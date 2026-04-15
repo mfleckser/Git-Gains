@@ -1,14 +1,14 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
-import { router } from "expo-router";
-import { WORKOUT_HISTORY, getExerciseById, formatDuration } from "@/lib/mockData";
+import { WORKOUT_HISTORY, formatDuration, getExerciseById } from "@/lib/mockData";
 import type { Workout } from "@/lib/types";
+import { router } from "expo-router";
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 function formatDate(isoString: string): string {
   const date = new Date(isoString);
@@ -85,7 +85,7 @@ export default function HomeScreen() {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.startButton}
-          onPress={() => router.push("/workout/select-template")}
+          onPress={() => router.push("/select-template")}
           activeOpacity={0.85}
         >
           <Text style={styles.startButtonText}>Start Workout</Text>

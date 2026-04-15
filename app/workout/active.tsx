@@ -1,19 +1,19 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  Modal,
-} from "react-native";
-import { useEffect, useState } from "react";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useWorkout } from "@/lib/WorkoutContext";
-import { getExerciseById, EXERCISES } from "@/lib/mockData";
+import { EXERCISES, getExerciseById } from "@/lib/mockData";
 import type { WorkoutExercise } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 function useElapsed(startedAt: Date): string {
   const [elapsed, setElapsed] = useState(0);
@@ -61,12 +61,14 @@ function ExerciseRow({ we, onPress }: { we: WorkoutExercise; onPress: () => void
 }
 
 export default function ActiveWorkoutScreen() {
-  const { active, addExercise, finishWorkout } = useWorkout();
+  const { active, completedWorkout, addExercise, finishWorkout } = useWorkout();
   const [showAddExercise, setShowAddExercise] = useState(false);
   const elapsed = useElapsed(active?.startedAt ?? new Date());
 
   if (!active) {
-    router.replace("/(tabs)/");
+    if (!completedWorkout) {
+      router.replace("/");
+    }
     return null;
   }
 

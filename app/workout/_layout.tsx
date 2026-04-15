@@ -8,6 +8,8 @@ export default function WorkoutLayout() {
         headerTintColor: "#FFFFFF",
         headerTitleStyle: { fontWeight: "600" },
       }}
-    />
+    >
+      <Stack.Screen name="active" options={{ title: "Active", presentation: "modal" }} />
+    </Stack>
   );
 }

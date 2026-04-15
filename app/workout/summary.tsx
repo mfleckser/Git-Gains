@@ -1,15 +1,15 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useWorkout } from "@/lib/WorkoutContext";
-import { getExerciseById, formatDuration } from "@/lib/mockData";
+import { formatDuration, getExerciseById } from "@/lib/mockData";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 function totalVolume(sets: { weight: number; reps: number; completed: boolean }[]): number {
   return sets
@@ -21,7 +21,6 @@ export default function WorkoutSummaryScreen() {
   const { completedWorkout, discardWorkout } = useWorkout();
 
   if (!completedWorkout) {
-    router.replace("/(tabs)/");
     return null;
   }
 
@@ -35,7 +34,7 @@ export default function WorkoutSummaryScreen() {
 
   function handleDone() {
     discardWorkout();
-    router.replace("/(tabs)/");
+    router.dismissAll();
   }
 
   return (
