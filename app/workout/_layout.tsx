@@ -9,7 +9,9 @@ export default function WorkoutLayout() {
         headerTitleStyle: { fontWeight: "600" },
       }}
     >
-      <Stack.Screen name="active" options={{ title: "Active", presentation: "modal" }} />
+      <Stack.Screen name="active" options={{ headerShown: false, presentation: "modal" }} />
+      <Stack.Screen name="summary" options={{ title: "Summary" }} />
+      <Stack.Screen name="[id]" options={{ headerBackTitle: "Home" }} />
     </Stack>
   );
 }

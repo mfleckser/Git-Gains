@@ -1,19 +1,19 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { useLocalSearchParams, router, Stack } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useWorkout } from "@/lib/WorkoutContext";
 import { getExerciseById, getLastWorkoutExercise } from "@/lib/mockData";
 import type { WorkoutSet } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useLocalSearchParams } from "expo-router";
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 function SetRow({
   set,
@@ -80,7 +80,7 @@ function SetRow({
 }
 
 export default function ExerciseScreen() {
-  const { id: workoutExerciseId } = useLocalSearchParams<{ id: string }>();
+  const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const { active, addSet } = useWorkout();
 
   const workoutExercise = active?.workout.exercises.find(

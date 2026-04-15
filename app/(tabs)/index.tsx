@@ -1,3 +1,4 @@
+import { WorkoutHeatmap } from "@/components/WorkoutHeatmap";
 import { WORKOUT_HISTORY, formatDuration, getExerciseById } from "@/lib/mockData";
 import type { Workout } from "@/lib/types";
 import { router } from "expo-router";
@@ -31,7 +32,11 @@ function WorkoutRow({ workout }: { workout: Workout }) {
   const more = workout.exercises.length > 3 ? ` +${workout.exercises.length - 3} more` : "";
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => router.push(`/${workout.id}`)}
+      activeOpacity={0.7}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>
           {workout.templateName ?? "Custom Workout"}
@@ -58,7 +63,7 @@ function WorkoutRow({ workout }: { workout: Workout }) {
           </View>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -71,7 +76,10 @@ export default function HomeScreen() {
         renderItem={({ item }) => <WorkoutRow workout={item} />}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <Text style={styles.sectionHeader}>Recent Workouts</Text>
+          <>
+            <WorkoutHeatmap workouts={WORKOUT_HISTORY} />
+            <Text style={styles.sectionHeader}>Recent Workouts</Text>
+          </>
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>

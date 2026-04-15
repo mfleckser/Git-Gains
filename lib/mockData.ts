@@ -1,32 +1,26 @@
-import type { Exercise, WorkoutTemplate, Workout, WorkoutExercise } from "./types";
+import type { Exercise, Workout, WorkoutExercise, WorkoutTemplate } from "./types";
 
 export const EXERCISES: Exercise[] = [
-  // Chest
-  { id: "e1", name: "Barbell Bench Press", muscleGroup: "Chest" },
-  { id: "e2", name: "Dumbbell Incline Press", muscleGroup: "Chest" },
-  { id: "e3", name: "Cable Chest Fly", muscleGroup: "Chest" },
-  // Back
-  { id: "e4", name: "Barbell Row", muscleGroup: "Back" },
-  { id: "e5", name: "Pull-Up", muscleGroup: "Back" },
-  { id: "e6", name: "Lat Pulldown", muscleGroup: "Back" },
-  { id: "e7", name: "Seated Cable Row", muscleGroup: "Back" },
-  // Legs
-  { id: "e8", name: "Barbell Squat", muscleGroup: "Legs" },
-  { id: "e9", name: "Romanian Deadlift", muscleGroup: "Legs" },
-  { id: "e10", name: "Leg Press", muscleGroup: "Legs" },
-  { id: "e11", name: "Walking Lunges", muscleGroup: "Legs" },
-  { id: "e12", name: "Leg Curl", muscleGroup: "Legs" },
-  // Shoulders
-  { id: "e13", name: "Overhead Press", muscleGroup: "Shoulders" },
-  { id: "e14", name: "Lateral Raise", muscleGroup: "Shoulders" },
-  { id: "e15", name: "Face Pull", muscleGroup: "Shoulders" },
-  // Arms
-  { id: "e16", name: "Barbell Curl", muscleGroup: "Biceps" },
-  { id: "e17", name: "Hammer Curl", muscleGroup: "Biceps" },
-  { id: "e18", name: "Tricep Pushdown", muscleGroup: "Triceps" },
-  { id: "e19", name: "Skull Crusher", muscleGroup: "Triceps" },
-  // Core
-  { id: "e20", name: "Plank", muscleGroup: "Core" },
+  { id: "e1", name: "Barbell bench press", muscleGroup: "Chest" },
+  { id: "e2", name: "Pull-ups", muscleGroup: "Back" },
+  { id: "e3", name: "Dumbbell shoulder press", muscleGroup: "Shoulders" },
+  { id: "e4", name: "Barbell row", muscleGroup: "Back" },
+  { id: "e5", name: "Dumbbell curl", muscleGroup: "Biceps" },
+  { id: "e6", name: "Overhead cable tricep extension", muscleGroup: "Triceps" },
+  { id: "e7", name: "Back squat", muscleGroup: "Legs" },
+  { id: "e8", name: "Romanian deadlift", muscleGroup: "Legs" },
+  { id: "e9", name: "Leg press", muscleGroup: "Legs" },
+  { id: "e10", name: "Leg curl", muscleGroup: "Legs" },
+  { id: "e11", name: "Calf raise", muscleGroup: "Legs" },
+  { id: "e12", name: "Incline dumbbell press", muscleGroup: "Chest" },
+  { id: "e13", name: "Lat pulldown", muscleGroup: "Back" },
+  { id: "e14", name: "Lateral raise", muscleGroup: "Shoulders" },
+  { id: "e15", name: "Single-arm dumbbell row", muscleGroup: "Back" },
+  { id: "e16", name: "Tricep pushdown", muscleGroup: "Triceps" },
+  { id: "e17", name: "Hack squat", muscleGroup: "Legs" },
+  { id: "e18", name: "Dumbbell Bulgarian split squat", muscleGroup: "Legs" },
+  { id: "e19", name: "Leg extension", muscleGroup: "Legs" },
+  { id: "e20", name: "Dips", muscleGroup: "Chest" },
 ];
 
 export const TEMPLATES: WorkoutTemplate[] = [
@@ -86,6 +80,71 @@ export const TEMPLATES: WorkoutTemplate[] = [
     updatedAt: "2026-04-01T00:00:00Z",
   },
 ];
+
+// Historical dates for calendar heatmap demo (date, template index 0–3)
+const HISTORY_DATES: [string, number][] = [
+  // October 2025
+  ["2025-10-01", 0], ["2025-10-03", 1], ["2025-10-05", 2],
+  ["2025-10-07", 3], ["2025-10-09", 0], ["2025-10-11", 1],
+  ["2025-10-13", 2], ["2025-10-15", 3], ["2025-10-17", 0],
+  ["2025-10-20", 1], ["2025-10-22", 2], ["2025-10-24", 3],
+  ["2025-10-26", 0], ["2025-10-28", 1], ["2025-10-30", 2],
+  // November 2025
+  ["2025-11-01", 3], ["2025-11-03", 0], ["2025-11-05", 1],
+  ["2025-11-08", 2], ["2025-11-10", 3], ["2025-11-12", 0],
+  ["2025-11-14", 1], ["2025-11-17", 2], ["2025-11-19", 3],
+  ["2025-11-21", 0], ["2025-11-24", 1], ["2025-11-25", 2],
+  ["2025-11-27", 3], ["2025-11-29", 0],
+  // December 2025
+  ["2025-12-01", 1], ["2025-12-03", 2], ["2025-12-05", 3],
+  ["2025-12-08", 0], ["2025-12-10", 1], ["2025-12-12", 2],
+  ["2025-12-15", 3], ["2025-12-17", 0], ["2025-12-19", 1],
+  ["2025-12-22", 2], ["2025-12-29", 3], ["2025-12-31", 0],
+  // January 2026
+  ["2026-01-02", 1], ["2026-01-04", 2], ["2026-01-06", 3],
+  ["2026-01-08", 0], ["2026-01-10", 1], ["2026-01-13", 2],
+  ["2026-01-15", 3], ["2026-01-17", 0], ["2026-01-20", 1],
+  ["2026-01-22", 2], ["2026-01-24", 3], ["2026-01-27", 0],
+  ["2026-01-29", 1], ["2026-01-31", 2],
+  // February 2026
+  ["2026-02-02", 3], ["2026-02-04", 0], ["2026-02-06", 1],
+  ["2026-02-09", 2], ["2026-02-11", 3], ["2026-02-13", 0],
+  ["2026-02-16", 1], ["2026-02-18", 2], ["2026-02-20", 3],
+  ["2026-02-23", 0], ["2026-02-25", 1], ["2026-02-27", 2],
+  // March 2026
+  ["2026-03-02", 3], ["2026-03-04", 0], ["2026-03-06", 1],
+  ["2026-03-09", 2], ["2026-03-11", 3], ["2026-03-13", 0],
+  ["2026-03-16", 1], ["2026-03-18", 2], ["2026-03-20", 3],
+  ["2026-03-23", 0], ["2026-03-25", 1], ["2026-03-27", 2],
+  ["2026-03-30", 3],
+  // Early April 2026 (before the seeded workouts below)
+  ["2026-04-01", 0], ["2026-04-03", 1], ["2026-04-05", 2],
+];
+
+const HISTORICAL_WORKOUTS: Workout[] = HISTORY_DATES.map(([date, tmplIdx], i) => {
+  const t = TEMPLATES[tmplIdx];
+  const firstEx = t.exercises[0];
+  return {
+    id: `h${i}`,
+    templateId: t.id,
+    templateName: t.name,
+    startedAt: `${date}T09:00:00Z`,
+    finishedAt: `${date}T10:00:00Z`,
+    durationSeconds: 3600,
+    exercises: [
+      {
+        id: `h${i}-we0`,
+        exerciseId: firstEx.exerciseId,
+        order: 0,
+        sets: [
+          { id: `h${i}-s0`, setNumber: 1, weight: 135, reps: 8, completed: true },
+          { id: `h${i}-s1`, setNumber: 2, weight: 140, reps: 8, completed: true },
+          { id: `h${i}-s2`, setNumber: 3, weight: 140, reps: 7, completed: true },
+        ],
+      },
+    ],
+  };
+});
 
 // Seeded workout history
 export let WORKOUT_HISTORY: Workout[] = [
@@ -242,10 +301,15 @@ export let WORKOUT_HISTORY: Workout[] = [
       },
     ],
   },
+  ...HISTORICAL_WORKOUTS,
 ];
 
 export function saveWorkout(workout: Workout): void {
   WORKOUT_HISTORY = [workout, ...WORKOUT_HISTORY];
+}
+
+export function deleteWorkout(id: string): void {
+  WORKOUT_HISTORY = WORKOUT_HISTORY.filter((w) => w.id !== id);
 }
 
 export function getLastWorkoutExercise(exerciseId: string): WorkoutExercise | null {
@@ -254,6 +318,10 @@ export function getLastWorkoutExercise(exerciseId: string): WorkoutExercise | nu
     if (found) return found;
   }
   return null;
+}
+
+export function getWorkoutById(id: string): Workout | undefined {
+  return WORKOUT_HISTORY.find((w) => w.id === id);
 }
 
 export function getExerciseById(id: string): Exercise | undefined {

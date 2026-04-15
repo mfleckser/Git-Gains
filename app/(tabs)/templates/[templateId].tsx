@@ -1,12 +1,11 @@
-import { useLocalSearchParams, router, useNavigation } from "expo-router";
-import { useLayoutEffect } from "react";
-import { TouchableOpacity, Text, Alert } from "react-native";
 import { TEMPLATES } from "@/lib/mockData";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLayoutEffect } from "react";
 import TemplateForm from "./TemplateForm";
 
 export default function TemplateDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const template = TEMPLATES.find((t) => t.id === id);
+  const { templateId } = useLocalSearchParams<{ templateId: string }>();
+  const template = TEMPLATES.find((t) => t.id === templateId);
   const navigation = useNavigation();
 
   useLayoutEffect(() => {

@@ -61,18 +61,33 @@ function ExerciseRow({ we, onPress }: { we: WorkoutExercise; onPress: () => void
 }
 
 export default function ActiveWorkoutScreen() {
-  const { active, completedWorkout, addExercise, finishWorkout } = useWorkout();
+  const { active, completedWorkout, addExercise, finishWorkout, discardWorkout } = useWorkout();
   const [showAddExercise, setShowAddExercise] = useState(false);
   const elapsed = useElapsed(active?.startedAt ?? new Date());
 
   if (!active) {
-    if (!completedWorkout) {
-      router.replace("/");
-    }
     return null;
   }
 
   const { workout } = active;
+
+  function handleCancel() {
+    Alert.alert(
+      "Cancel Workout?",
+      "Your progress will not be saved.",
+      [
+        { text: "Keep Going", style: "cancel" },
+        {
+          text: "Cancel Workout",
+          style: "destructive",
+          onPress: () => {
+            discardWorkout();
+            router.dismissAll();
+          },
+        },
+      ]
+    );
+  }
 
   function handleFinish() {
     const completedSets = workout.exercises
@@ -113,12 +128,8 @@ export default function ActiveWorkoutScreen() {
           </Text>
           <Text style={styles.timer}>{elapsed}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.finishButton}
-          onPress={handleFinish}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.finishButtonText}>Finish</Text>
+        <TouchableOpacity onPress={handleCancel} activeOpacity={0.7}>
+          <Text style={styles.cancelButton}>Cancel</Text>
         </TouchableOpacity>
       </View>
 
@@ -149,6 +160,16 @@ export default function ActiveWorkoutScreen() {
           </TouchableOpacity>
         }
       />
+
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.finishButton}
+          onPress={handleFinish}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.finishButtonText}>Finish Workout</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Add Exercise Modal */}
       <Modal
@@ -209,20 +230,36 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     marginTop: 2,
   },
+  cancelButton: {
+    fontSize: 16,
+    color: "#FF3B30",
+    fontWeight: "500",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    paddingBottom: 32,
+    backgroundColor: "#000000",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "#2C2C2E",
+  },
   finishButton: {
     backgroundColor: "#30D158",
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
   },
   finishButtonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "600",
   },
   list: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   exerciseRow: {
     backgroundColor: "#1C1C1E",
