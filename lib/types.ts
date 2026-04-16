@@ -3,6 +3,7 @@ export type Exercise = {
   name: string;
   muscleGroup: string;
   notes?: string;
+  userId?: string; // undefined = global catalog; set = user-created custom exercise
 };
 
 export type TemplateExercise = {

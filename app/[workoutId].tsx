@@ -1,7 +1,9 @@
 import { WorkoutStats } from "@/components/WorkoutStats";
-import { deleteWorkout, getWorkoutById } from "@/lib/mockData";
+import { deleteWorkout, getWorkoutById } from "@/lib/api";
+import type { Workout } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -23,7 +25,11 @@ function formatDate(isoString: string): string {
 
 export default function WorkoutDetailScreen() {
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
-  const workout = getWorkoutById(workoutId);
+  const [workout, setWorkout] = useState<Workout | null>(null);
+
+  useEffect(() => {
+    getWorkoutById(workoutId).then(setWorkout);
+  }, [workoutId]);
 
   if (!workout) return null;
 
@@ -40,7 +46,7 @@ export default function WorkoutDetailScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteWorkout(workoutId);
+            deleteWorkout(workoutId).catch(console.error);
             router.back();
           },
         },
@@ -59,8 +65,8 @@ export default function WorkoutDetailScreen() {
             </View>
           ),
           headerRight: () => (
-            <TouchableOpacity onPress={handleDelete} activeOpacity={0.7} style={styles.deleteButton} >
-              <View >
+            <TouchableOpacity onPress={handleDelete} activeOpacity={0.7} style={styles.deleteButton}>
+              <View>
                 <Ionicons name="trash-outline" size={26} color="#FF3B30" />
               </View>
             </TouchableOpacity>
@@ -92,6 +98,6 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   deleteButton: {
-    padding: 5
-  }
+    padding: 5,
+  },
 });

@@ -6,15 +6,22 @@ import {
   StyleSheet,
   SafeAreaView,
 } from "react-native";
-import { router } from "expo-router";
+import { useFocusEffect, router } from "expo-router";
+import { useCallback, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { TEMPLATES, getExerciseById } from "@/lib/mockData";
-import type { WorkoutTemplate } from "@/lib/types";
+import { getExercises, getTemplates } from "@/lib/api";
+import type { Exercise, WorkoutTemplate } from "@/lib/types";
 
-function TemplateRow({ template }: { template: WorkoutTemplate }) {
+function TemplateRow({
+  template,
+  exerciseMap,
+}: {
+  template: WorkoutTemplate;
+  exerciseMap: Map<string, Exercise>;
+}) {
   const exerciseNames = template.exercises
     .slice(0, 3)
-    .map((te) => getExerciseById(te.exerciseId)?.name ?? "Unknown")
+    .map((te) => exerciseMap.get(te.exerciseId)?.name ?? "Unknown")
     .join(", ");
   const more =
     template.exercises.length > 3
@@ -49,12 +56,22 @@ function TemplateRow({ template }: { template: WorkoutTemplate }) {
 }
 
 export default function TemplatesScreen() {
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
+  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
+
+  useFocusEffect(
+    useCallback(() => {
+      getTemplates().then(setTemplates);
+      getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={TEMPLATES}
+        data={templates}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TemplateRow template={item} />}
+        renderItem={({ item }) => <TemplateRow template={item} exerciseMap={exerciseMap} />}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.emptyState}>

@@ -9,11 +9,11 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { EXERCISES, TEMPLATES } from "@/lib/mockData";
-import type { WorkoutTemplate, TemplateExercise } from "@/lib/types";
+import { createTemplate, getExercises, updateTemplate } from "@/lib/api";
+import type { Exercise, WorkoutTemplate, TemplateExercise } from "@/lib/types";
 
 type Props = {
   initialTemplate?: WorkoutTemplate;
@@ -29,32 +29,33 @@ export default function TemplateForm({ initialTemplate }: Props) {
   const [exercises, setExercises] = useState<TemplateExercise[]>(
     initialTemplate?.exercises ?? []
   );
+  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  function handleSave() {
+  useEffect(() => {
+    getExercises().then(setAllExercises);
+  }, []);
+
+  async function handleSave() {
     if (!name.trim()) {
       Alert.alert("Name required", "Please enter a template name.");
       return;
     }
-
-    const now = new Date().toISOString();
-    const saved: WorkoutTemplate = {
-      id: initialTemplate?.id ?? generateId(),
-      name: name.trim(),
-      notes: notes.trim() || undefined,
-      exercises,
-      createdAt: initialTemplate?.createdAt ?? now,
-      updatedAt: now,
-    };
-
-    if (initialTemplate) {
-      const idx = TEMPLATES.findIndex((t) => t.id === initialTemplate.id);
-      if (idx !== -1) TEMPLATES[idx] = saved;
-    } else {
-      TEMPLATES.push(saved);
+    setSaving(true);
+    try {
+      const data = { name: name.trim(), notes: notes.trim() || undefined, exercises };
+      if (initialTemplate) {
+        await updateTemplate(initialTemplate.id, data);
+      } else {
+        await createTemplate(data);
+      }
+      router.back();
+    } catch {
+      Alert.alert("Error", "Failed to save template. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    router.back();
   }
 
   function handleRemoveExercise(order: number) {
@@ -84,18 +85,13 @@ export default function TemplateForm({ initialTemplate }: Props) {
   function handleAddExercise(exerciseId: string) {
     setExercises((prev) => [
       ...prev,
-      {
-        exerciseId,
-        order: prev.length,
-        targetSets: 3,
-        targetReps: 10,
-      },
+      { exerciseId, order: prev.length, targetSets: 3, targetReps: 10 },
     ]);
     setShowExercisePicker(false);
   }
 
   const exerciseName = (id: string) =>
-    EXERCISES.find((e) => e.id === id)?.name ?? id;
+    allExercises.find((e) => e.id === id)?.name ?? id;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -167,11 +163,14 @@ export default function TemplateForm({ initialTemplate }: Props) {
               <Text style={styles.addExerciseText}>Add Exercise</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.saveButton}
+              style={[styles.saveButton, saving && { opacity: 0.6 }]}
               onPress={handleSave}
               activeOpacity={0.85}
+              disabled={saving}
             >
-              <Text style={styles.saveButtonText}>Save Template</Text>
+              <Text style={styles.saveButtonText}>
+                {saving ? "Saving…" : "Save Template"}
+              </Text>
             </TouchableOpacity>
           </View>
         }
@@ -191,7 +190,7 @@ export default function TemplateForm({ initialTemplate }: Props) {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={EXERCISES}
+            data={allExercises}
             keyExtractor={(e) => e.id}
             renderItem={({ item }) => (
               <TouchableOpacity

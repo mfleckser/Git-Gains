@@ -1,0 +1,22 @@
+-- Global exercise catalog (user_id = NULL means visible to all users)
+INSERT INTO exercises (name, muscle_group) VALUES
+  ('Barbell bench press', 'Chest'),
+  ('Pull-ups', 'Back'),
+  ('Dumbbell shoulder press', 'Shoulders'),
+  ('Barbell row', 'Back'),
+  ('Dumbbell curl', 'Biceps'),
+  ('Overhead cable tricep extension', 'Triceps'),
+  ('Back squat', 'Legs'),
+  ('Romanian deadlift', 'Legs'),
+  ('Leg press', 'Legs'),
+  ('Leg curl', 'Legs'),
+  ('Calf raise', 'Legs'),
+  ('Incline dumbbell press', 'Chest'),
+  ('Lat pulldown', 'Back'),
+  ('Lateral raise', 'Shoulders'),
+  ('Single-arm dumbbell row', 'Back'),
+  ('Tricep pushdown', 'Triceps'),
+  ('Hack squat', 'Legs'),
+  ('Dumbbell Bulgarian split squat', 'Legs'),
+  ('Leg extension', 'Legs'),
+  ('Dips', 'Chest');

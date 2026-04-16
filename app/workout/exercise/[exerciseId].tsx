@@ -1,8 +1,9 @@
 import { useWorkout } from "@/lib/WorkoutContext";
-import { getExerciseById, getLastWorkoutExercise } from "@/lib/mockData";
-import type { WorkoutSet } from "@/lib/types";
+import { getExercises, getLastWorkoutExercise } from "@/lib/api";
+import type { Exercise, WorkoutExercise, WorkoutSet } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -82,21 +83,22 @@ function SetRow({
 export default function ExerciseScreen() {
   const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const { active, addSet } = useWorkout();
+  const [exercise, setExercise] = useState<Exercise | undefined>();
+  const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
 
   const workoutExercise = active?.workout.exercises.find(
     (e) => e.id === workoutExerciseId
   );
-  const exercise = workoutExercise
-    ? getExerciseById(workoutExercise.exerciseId)
-    : undefined;
 
-  const lastTime = workoutExercise
-    ? getLastWorkoutExercise(workoutExercise.exerciseId)
-    : null;
+  useEffect(() => {
+    if (!workoutExercise) return;
+    getExercises().then((exs) => {
+      setExercise(exs.find((e) => e.id === workoutExercise.exerciseId));
+    });
+    getLastWorkoutExercise(workoutExercise.exerciseId).then(setLastTime);
+  }, [workoutExercise?.exerciseId]);
 
-  if (!workoutExercise || !active) {
-    return null;
-  }
+  if (!workoutExercise || !active) return null;
 
   return (
     <>

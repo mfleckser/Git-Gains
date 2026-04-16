@@ -7,13 +7,21 @@ import {
   SafeAreaView,
 } from "react-native";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { TEMPLATES, getExerciseById } from "@/lib/mockData";
+import { getExercises, getTemplates } from "@/lib/api";
 import { useWorkout } from "@/lib/WorkoutContext";
-import type { WorkoutTemplate } from "@/lib/types";
+import type { Exercise, WorkoutTemplate } from "@/lib/types";
 
 export default function SelectTemplateScreen() {
   const { startWorkout } = useWorkout();
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
+  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
+
+  useEffect(() => {
+    getTemplates().then(setTemplates);
+    getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
+  }, []);
 
   function handleSelectTemplate(template: WorkoutTemplate) {
     startWorkout(template);
@@ -28,7 +36,7 @@ export default function SelectTemplateScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={TEMPLATES}
+        data={templates}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
@@ -50,7 +58,7 @@ export default function SelectTemplateScreen() {
         renderItem={({ item }) => {
           const exerciseNames = item.exercises
             .slice(0, 3)
-            .map((te) => getExerciseById(te.exerciseId)?.name ?? "Unknown")
+            .map((te) => exerciseMap.get(te.exerciseId)?.name ?? "Unknown")
             .join(", ");
           const more =
             item.exercises.length > 3

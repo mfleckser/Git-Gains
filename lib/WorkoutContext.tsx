@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import * as Haptics from "expo-haptics";
 import type { Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate } from "./types";
-import { EXERCISES, saveWorkout } from "./mockData";
+import { saveWorkout } from "./api";
 
 type ActiveWorkout = {
   workout: Workout;
@@ -35,7 +35,7 @@ type Action =
       type: "TOGGLE_SET_COMPLETE";
       payload: { workoutExerciseId: string; setId: string };
     }
-  | { type: "FINISH_WORKOUT" }
+  | { type: "FINISH_WORKOUT"; payload: Workout }
   | { type: "DISCARD_WORKOUT" };
 
 function generateId(): string {
@@ -150,18 +150,7 @@ function reducer(state: State, action: Action): State {
     }
 
     case "FINISH_WORKOUT": {
-      if (!state.active) return state;
-      const now = new Date();
-      const durationSeconds = Math.floor(
-        (now.getTime() - state.active.startedAt.getTime()) / 1000
-      );
-      const completed: Workout = {
-        ...state.active.workout,
-        finishedAt: now.toISOString(),
-        durationSeconds,
-      };
-      saveWorkout(completed);
-      return { active: null, completedWorkout: completed };
+      return { active: null, completedWorkout: action.payload };
     }
 
     case "DISCARD_WORKOUT": {
@@ -223,8 +212,19 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const finishWorkout = useCallback(() => {
-    dispatch({ type: "FINISH_WORKOUT" });
-  }, []);
+    if (!state.active) return;
+    const now = new Date();
+    const durationSeconds = Math.floor(
+      (now.getTime() - state.active.startedAt.getTime()) / 1000
+    );
+    const completed: Workout = {
+      ...state.active.workout,
+      finishedAt: now.toISOString(),
+      durationSeconds,
+    };
+    dispatch({ type: "FINISH_WORKOUT", payload: completed });
+    saveWorkout(completed).catch(console.error);
+  }, [state.active]);
 
   const discardWorkout = useCallback(() => {
     dispatch({ type: "DISCARD_WORKOUT" });

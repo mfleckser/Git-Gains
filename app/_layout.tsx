@@ -1,7 +1,32 @@
 import { WorkoutProvider } from "@/lib/WorkoutContext";
+import { supabase } from "@/lib/supabase";
 import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 export default function RootLayout() {
+  const [authReady, setAuthReady] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        await supabase.auth.signInWithPassword({
+          email: process.env.EXPO_PUBLIC_USER_EMAIL!,
+          password: process.env.EXPO_PUBLIC_USER_PASSWORD!,
+        });
+      }
+      setAuthReady(true);
+    });
+  }, []);
+
+  if (!authReady) {
+    return (
+      <View style={{ flex: 1, backgroundColor: "#000000", justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
     <WorkoutProvider>
       <Stack
@@ -12,7 +37,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ title: "Home", headerShown: false }} />
-        <Stack.Screen name="select-template" options={{ title: "Select Template", presentation: "modal", }} />
+        <Stack.Screen name="select-template" options={{ title: "Select Template", presentation: "modal" }} />
         <Stack.Screen name="workout" options={{ headerShown: false }} />
       </Stack>
     </WorkoutProvider>

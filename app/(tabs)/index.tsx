@@ -1,7 +1,8 @@
 import { WorkoutHeatmap } from "@/components/WorkoutHeatmap";
-import { WORKOUT_HISTORY, formatDuration, getExerciseById } from "@/lib/mockData";
-import type { Workout } from "@/lib/types";
-import { router } from "expo-router";
+import { formatDuration, getExercises, getWorkoutHistory } from "@/lib/api";
+import type { Exercise, Workout } from "@/lib/types";
+import { useFocusEffect, router } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -24,10 +25,16 @@ function totalSets(workout: Workout): number {
   return workout.exercises.reduce((acc, ex) => acc + ex.sets.filter((s) => s.completed).length, 0);
 }
 
-function WorkoutRow({ workout }: { workout: Workout }) {
+function WorkoutRow({
+  workout,
+  exerciseMap,
+}: {
+  workout: Workout;
+  exerciseMap: Map<string, Exercise>;
+}) {
   const exerciseNames = workout.exercises
     .slice(0, 3)
-    .map((we) => getExerciseById(we.exerciseId)?.name ?? "Unknown")
+    .map((we) => exerciseMap.get(we.exerciseId)?.name ?? "Unknown")
     .join(", ");
   const more = workout.exercises.length > 3 ? ` +${workout.exercises.length - 3} more` : "";
 
@@ -68,16 +75,26 @@ function WorkoutRow({ workout }: { workout: Workout }) {
 }
 
 export default function HomeScreen() {
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
+
+  useFocusEffect(
+    useCallback(() => {
+      getWorkoutHistory().then(setWorkouts);
+      getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={WORKOUT_HISTORY}
+        data={workouts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <WorkoutRow workout={item} />}
+        renderItem={({ item }) => <WorkoutRow workout={item} exerciseMap={exerciseMap} />}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <WorkoutHeatmap workouts={WORKOUT_HISTORY} />
+            <WorkoutHeatmap workouts={workouts} />
             <Text style={styles.sectionHeader}>Recent Workouts</Text>
           </>
         }

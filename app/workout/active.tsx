@@ -1,6 +1,6 @@
 import { useWorkout } from "@/lib/WorkoutContext";
-import { EXERCISES, getExerciseById } from "@/lib/mockData";
-import type { WorkoutExercise } from "@/lib/types";
+import { getExercises } from "@/lib/api";
+import type { Exercise, WorkoutExercise } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -32,8 +32,16 @@ function useElapsed(startedAt: Date): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function ExerciseRow({ we, onPress }: { we: WorkoutExercise; onPress: () => void }) {
-  const exercise = getExerciseById(we.exerciseId);
+function ExerciseRow({
+  we,
+  exerciseMap,
+  onPress,
+}: {
+  we: WorkoutExercise;
+  exerciseMap: Map<string, Exercise>;
+  onPress: () => void;
+}) {
+  const exercise = exerciseMap.get(we.exerciseId);
   const completedSets = we.sets.filter((s) => s.completed).length;
   const totalSets = we.sets.length;
   const progress = totalSets > 0 ? completedSets / totalSets : 0;
@@ -61,13 +69,16 @@ function ExerciseRow({ we, onPress }: { we: WorkoutExercise; onPress: () => void
 }
 
 export default function ActiveWorkoutScreen() {
-  const { active, completedWorkout, addExercise, finishWorkout, discardWorkout } = useWorkout();
+  const { active, addExercise, finishWorkout, discardWorkout } = useWorkout();
   const [showAddExercise, setShowAddExercise] = useState(false);
+  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
   const elapsed = useElapsed(active?.startedAt ?? new Date());
 
-  if (!active) {
-    return null;
-  }
+  useEffect(() => {
+    getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
+  }, []);
+
+  if (!active) return null;
 
   const { workout } = active;
 
@@ -140,6 +151,7 @@ export default function ActiveWorkoutScreen() {
         renderItem={({ item }) => (
           <ExerciseRow
             we={item}
+            exerciseMap={exerciseMap}
             onPress={() => router.push(`/workout/exercise/${item.id}`)}
           />
         )}
@@ -186,7 +198,7 @@ export default function ActiveWorkoutScreen() {
             </TouchableOpacity>
           </View>
           <FlatList
-            data={EXERCISES}
+            data={[...exerciseMap.values()].sort((a, b) => a.name.localeCompare(b.name))}
             keyExtractor={(e) => e.id}
             renderItem={({ item }) => (
               <TouchableOpacity

@@ -1,8 +1,15 @@
-import { formatDuration, getExerciseById } from "@/lib/mockData";
-import type { Workout } from "@/lib/types";
+import { formatDuration, getExercises } from "@/lib/api";
+import type { Exercise, Workout } from "@/lib/types";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 export function WorkoutStats({ workout }: { workout: Workout }) {
+  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
+
+  useEffect(() => {
+    getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
+  }, []);
+
   const completedSets = workout.exercises
     .flatMap((e) => e.sets)
     .filter((s) => s.completed).length;
@@ -38,7 +45,7 @@ export function WorkoutStats({ workout }: { workout: Workout }) {
       <Text style={styles.sectionHeader}>Exercises</Text>
 
       {workout.exercises.map((item) => {
-        const exercise = getExerciseById(item.exerciseId);
+        const exercise = exerciseMap.get(item.exerciseId);
         const completedCount = item.sets.filter((s) => s.completed).length;
         return (
           <View key={item.id} style={styles.exerciseCard}>
