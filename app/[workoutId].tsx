@@ -1,9 +1,8 @@
 import { WorkoutStats } from "@/components/WorkoutStats";
-import { deleteWorkout, getWorkoutById } from "@/lib/api";
-import type { Workout } from "@/lib/types";
+import { deleteWorkout } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import {
   Alert,
   SafeAreaView,
@@ -25,11 +24,8 @@ function formatDate(isoString: string): string {
 
 export default function WorkoutDetailScreen() {
   const { workoutId } = useLocalSearchParams<{ workoutId: string }>();
-  const [workout, setWorkout] = useState<Workout | null>(null);
-
-  useEffect(() => {
-    getWorkoutById(workoutId).then(setWorkout);
-  }, [workoutId]);
+  const { workouts, refreshWorkouts } = useAppData();
+  const workout = workouts.find((w) => w.id === workoutId) ?? null;
 
   if (!workout) return null;
 
@@ -46,7 +42,7 @@ export default function WorkoutDetailScreen() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteWorkout(workoutId).catch(console.error);
+            deleteWorkout(workoutId).then(() => refreshWorkouts()).catch(console.error);
             router.back();
           },
         },

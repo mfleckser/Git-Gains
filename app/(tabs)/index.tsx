@@ -1,8 +1,8 @@
 import { WorkoutHeatmap } from "@/components/WorkoutHeatmap";
-import { formatDuration, getExercises, getWorkoutHistory } from "@/lib/api";
+import { formatDuration } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, Workout } from "@/lib/types";
-import { useFocusEffect, router } from "expo-router";
-import { useCallback, useState } from "react";
+import { router } from "expo-router";
 import {
   FlatList,
   SafeAreaView,
@@ -75,15 +75,7 @@ function WorkoutRow({
 }
 
 export default function HomeScreen() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
-
-  useFocusEffect(
-    useCallback(() => {
-      getWorkoutHistory().then(setWorkouts);
-      getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
-    }, [])
-  );
+  const { workouts, exerciseMap } = useAppData();
 
   return (
     <SafeAreaView style={styles.container}>

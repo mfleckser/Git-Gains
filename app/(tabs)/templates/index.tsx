@@ -6,10 +6,9 @@ import {
   StyleSheet,
   SafeAreaView,
 } from "react-native";
-import { useFocusEffect, router } from "expo-router";
-import { useCallback, useState } from "react";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getExercises, getTemplates } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, WorkoutTemplate } from "@/lib/types";
 
 function TemplateRow({
@@ -56,15 +55,7 @@ function TemplateRow({
 }
 
 export default function TemplatesScreen() {
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
-  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
-
-  useFocusEffect(
-    useCallback(() => {
-      getTemplates().then(setTemplates);
-      getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
-    }, [])
-  );
+  const { templates, exerciseMap } = useAppData();
 
   return (
     <SafeAreaView style={styles.container}>

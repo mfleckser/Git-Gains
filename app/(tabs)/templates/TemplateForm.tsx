@@ -9,29 +9,26 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { createTemplate, getExercises, updateTemplate } from "@/lib/api";
-import type { Exercise, WorkoutTemplate, TemplateExercise } from "@/lib/types";
+import { createTemplate, updateTemplate } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
+import type { WorkoutTemplate, TemplateExercise } from "@/lib/types";
 
 type Props = {
   initialTemplate?: WorkoutTemplate;
 };
 
 export default function TemplateForm({ initialTemplate }: Props) {
+  const { exercises: allExercises, refreshTemplates } = useAppData();
   const [name, setName] = useState(initialTemplate?.name ?? "");
   const [notes, setNotes] = useState(initialTemplate?.notes ?? "");
   const [exercises, setExercises] = useState<TemplateExercise[]>(
     initialTemplate?.exercises ?? []
   );
-  const [allExercises, setAllExercises] = useState<Exercise[]>([]);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    getExercises().then(setAllExercises);
-  }, []);
 
   async function handleSave() {
     if (!name.trim()) {
@@ -46,6 +43,7 @@ export default function TemplateForm({ initialTemplate }: Props) {
       } else {
         await createTemplate(data);
       }
+      await refreshTemplates();
       router.back();
     } catch {
       Alert.alert("Error", "Failed to save template. Please try again.");

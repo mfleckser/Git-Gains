@@ -7,21 +7,13 @@ import {
   SafeAreaView,
 } from "react-native";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { getExercises, getTemplates } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
 import { useWorkout } from "@/lib/WorkoutContext";
-import type { Exercise, WorkoutTemplate } from "@/lib/types";
 
 export default function SelectTemplateScreen() {
   const { startWorkout } = useWorkout();
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
-  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
-
-  useEffect(() => {
-    getTemplates().then(setTemplates);
-    getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
-  }, []);
+  const { templates, exerciseMap } = useAppData();
 
   function handleSelectTemplate(template: WorkoutTemplate) {
     startWorkout(template);

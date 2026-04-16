@@ -1,6 +1,6 @@
-import { useWorkout } from "@/lib/WorkoutContext";
-import { getExercises } from "@/lib/api";
+import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, WorkoutExercise } from "@/lib/types";
+import { useWorkout } from "@/lib/WorkoutContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -70,13 +70,9 @@ function ExerciseRow({
 
 export default function ActiveWorkoutScreen() {
   const { active, addExercise, finishWorkout, discardWorkout } = useWorkout();
+  const { exerciseMap } = useAppData();
   const [showAddExercise, setShowAddExercise] = useState(false);
-  const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
   const elapsed = useElapsed(active?.startedAt ?? new Date());
-
-  useEffect(() => {
-    getExercises().then((exs) => setExerciseMap(new Map(exs.map((e) => [e.id, e]))));
-  }, []);
 
   if (!active) return null;
 
@@ -158,7 +154,7 @@ export default function ActiveWorkoutScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No exercises yet.</Text>
-            <Text style={styles.emptySubtext}>Tap "Add Exercise" to get started.</Text>
+            <Text style={styles.emptySubtext}>Tap &quot;Add Exercise&quot; to get started.</Text>
           </View>
         }
         ListFooterComponent={

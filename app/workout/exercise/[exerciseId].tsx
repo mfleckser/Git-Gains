@@ -1,6 +1,7 @@
 import { useWorkout } from "@/lib/WorkoutContext";
-import { getExercises, getLastWorkoutExercise } from "@/lib/api";
-import type { Exercise, WorkoutExercise, WorkoutSet } from "@/lib/types";
+import { useAppData } from "@/lib/AppDataContext";
+import { getLastWorkoutExercise } from "@/lib/api";
+import type { WorkoutExercise, WorkoutSet } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -83,18 +84,16 @@ function SetRow({
 export default function ExerciseScreen() {
   const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const { active, addSet } = useWorkout();
-  const [exercise, setExercise] = useState<Exercise | undefined>();
+  const { exerciseMap } = useAppData();
   const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
 
   const workoutExercise = active?.workout.exercises.find(
     (e) => e.id === workoutExerciseId
   );
+  const exercise = workoutExercise ? exerciseMap.get(workoutExercise.exerciseId) : undefined;
 
   useEffect(() => {
     if (!workoutExercise) return;
-    getExercises().then((exs) => {
-      setExercise(exs.find((e) => e.id === workoutExercise.exerciseId));
-    });
     getLastWorkoutExercise(workoutExercise.exerciseId).then(setLastTime);
   }, [workoutExercise?.exerciseId]);
 

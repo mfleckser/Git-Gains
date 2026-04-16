@@ -7,6 +7,7 @@ import React, {
 import * as Haptics from "expo-haptics";
 import type { Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate } from "./types";
 import { saveWorkout } from "./api";
+import { useAppData } from "./AppDataContext";
 
 type ActiveWorkout = {
   workout: Workout;
@@ -186,6 +187,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     active: null,
     completedWorkout: null,
   });
+  const { refreshWorkouts } = useAppData();
 
   const startWorkout = useCallback((template?: WorkoutTemplate) => {
     dispatch({ type: "START_WORKOUT", payload: { template } });
@@ -223,8 +225,8 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
       durationSeconds,
     };
     dispatch({ type: "FINISH_WORKOUT", payload: completed });
-    saveWorkout(completed).catch(console.error);
-  }, [state.active]);
+    saveWorkout(completed).then(() => refreshWorkouts()).catch(console.error);
+  }, [state.active, refreshWorkouts]);
 
   const discardWorkout = useCallback(() => {
     dispatch({ type: "DISCARD_WORKOUT" });
