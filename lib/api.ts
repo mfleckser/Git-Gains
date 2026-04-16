@@ -209,9 +209,9 @@ export async function getWorkoutById(id: string): Promise<Workout | null> {
 
 export async function saveWorkout(workout: Workout): Promise<void> {
   const userId = await getUserId();
+  console.log(workout);
   const { error } = await supabase.rpc('save_workout', {
     p_data: {
-      id: workout.id,
       userId,
       templateId: workout.templateId ?? null,
       templateName: workout.templateName ?? null,
@@ -219,12 +219,10 @@ export async function saveWorkout(workout: Workout): Promise<void> {
       finishedAt: workout.finishedAt ?? null,
       durationSeconds: workout.durationSeconds ?? null,
       exercises: workout.exercises.map((we) => ({
-        id: we.id,
         exerciseId: we.exerciseId,
         order: we.order,
         notes: we.notes ?? null,
         sets: we.sets.map((s) => ({
-          id: s.id,
           setNumber: s.setNumber,
           weight: s.weight,
           reps: s.reps,

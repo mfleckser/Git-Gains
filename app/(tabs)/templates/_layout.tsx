@@ -10,7 +10,7 @@ export default function TemplatesLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Templates" }} />
-      <Stack.Screen name="[id]" options={{ title: "Template" }} />
+      <Stack.Screen name="[templateId]" options={{ title: "Template" }} />
       <Stack.Screen name="new" options={{ title: "New Template" }} />
     </Stack>
   );

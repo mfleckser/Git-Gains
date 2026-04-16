@@ -48,6 +48,10 @@ app/_layout.tsx          ← Root Stack; handles auth init; wraps everything in 
   [workoutId].tsx        ← Past workout detail
 ```
 
+### Git Workflow
+- Run `git add . && git commit` with a descriptive message whenever a feature is completed and the user confirms they're happy with it.
+- No GitHub remote yet — do not push. This note will be updated when a remote is added.
+
 ### Key Conventions
 - Navigate home with `router.dismissAll()`, never `router.replace("/")`.
 - All DB rows use snake_case; `lib/api.ts` maps them to camelCase TypeScript types from `lib/types.ts`.

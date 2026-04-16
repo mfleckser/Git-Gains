@@ -19,10 +19,6 @@ type Props = {
   initialTemplate?: WorkoutTemplate;
 };
 
-function generateId(): string {
-  return Math.random().toString(36).slice(2, 10);
-}
-
 export default function TemplateForm({ initialTemplate }: Props) {
   const [name, setName] = useState(initialTemplate?.name ?? "");
   const [notes, setNotes] = useState(initialTemplate?.notes ?? "");
