@@ -1,4 +1,5 @@
 import type { Workout } from "@/lib/types";
+import { buildHeatmap, toDateKey } from "@/lib/heatmap";
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -16,10 +17,6 @@ const CARD_PADDING = 16;
 const LIST_PADDING = 16;
 const MONTH_LABEL_HEIGHT = 18;
 
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -34,14 +31,8 @@ interface Props {
 export function WorkoutHeatmap({ workouts }: Props) {
   const { width: windowWidth } = useWindowDimensions();
 
-  const activeDates = new Set(
-    workouts.map((w) => toDateKey(new Date(w.startedAt)))
-  );
-
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
-  // Calculate how many week columns fit in the available width
   const gridWidth =
     windowWidth -
     LIST_PADDING * 2 -
@@ -50,34 +41,11 @@ export function WorkoutHeatmap({ workouts }: Props) {
     DAY_LABEL_MARGIN;
   const numWeeks = Math.floor((gridWidth + CELL_GAP) / CELL_STEP);
 
-  // Work backwards from today: start at the Sunday of the first visible week
-  const gridEnd = new Date(today);
-  const gridStart = new Date(today);
-  gridStart.setDate(today.getDate() - today.getDay() - (numWeeks - 1) * 7);
-
-  // startDate is the earliest day shown (may be after gridStart for partial first week)
-  const startDate = new Date(gridStart);
-
-  // Build week columns
-  const weeks: (Date | null)[][] = [];
-  const cursor = new Date(gridStart);
-
-  while (cursor <= gridEnd) {
-    const week: (Date | null)[] = [];
-    for (let d = 0; d < 7; d++) {
-      const day = new Date(cursor);
-      day.setDate(cursor.getDate() + d);
-      week.push(day <= today ? day : null);
-    }
-    weeks.push(week);
-    cursor.setDate(cursor.getDate() + 7);
-  }
-
-  const totalWorkouts = workouts.filter((w) => {
-    const d = new Date(w.startedAt);
-    d.setHours(0, 0, 0, 0);
-    return d >= startDate && d <= today;
-  }).length;
+  const { weeks, startDate, activeDates, totalWorkouts } = buildHeatmap(
+    workouts,
+    today,
+    numWeeks
+  );
 
   return (
     <View style={styles.card}>

@@ -3,6 +3,7 @@ import { useAppData } from "@/lib/AppDataContext";
 import { useWorkout } from "@/lib/WorkoutContext";
 import { getLastWorkoutExercise } from "@/lib/api";
 import type { WorkoutExercise, WorkoutSet } from "@/lib/types";
+import { kgToLb, lbToKg, roundTenth } from "@/lib/units";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,14 +19,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-function lbToKg(lbs: number) : number {
-  return 0.45359237 * lbs;
-}
-
-function kgToLb(kgs: number) : number {
-  return 2.2046226218 * kgs;
-}
 
 function SetRow({
   set,
@@ -52,7 +45,7 @@ function SetRow({
           onChangeText={setWeightText}
           onEndEditing={(e) => {
             const n = parseFloat(weightText);
-            const lbsWeight = useKg ? Math.round(kgToLb(n) * 10) / 10 : n;
+            const lbsWeight = useKg ? roundTenth(kgToLb(n)) : n;
             updateSet(workoutExerciseId, set.id, "weight", isNaN(n) ? 0 : lbsWeight);
             setWeightText(isNaN(n) || n === 0 ? "" : String(n));
           }}
@@ -146,7 +139,7 @@ export default function ExerciseScreen() {
                     </View>
                     {lastTime.sets.map((s) => (
                       <Text key={s.id} style={styles.lastTimeSet}>
-                        Set {s.setNumber}: {s.weight > 0 ? `${useKg ? Math.round(lbToKg(s.weight) * 10) / 10 : s.weight} ${useKg ? "kgs" : "lbs"} × ` : "BW × "}
+                        Set {s.setNumber}: {s.weight > 0 ? `${useKg ? roundTenth(lbToKg(s.weight)) : s.weight} ${useKg ? "kgs" : "lbs"} × ` : "BW × "}
                         {s.reps} reps
                       </Text>
                     ))}
