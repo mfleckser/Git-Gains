@@ -210,7 +210,6 @@ export async function getWorkoutById(id: string): Promise<Workout | null> {
 
 export async function saveWorkout(workout: Workout): Promise<void> {
   const userId = await getUserId();
-  console.log(workout);
   const { error } = await supabase.rpc('save_workout', {
     p_data: {
       userId,

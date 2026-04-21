@@ -1,4 +1,4 @@
-import { ANNOTATION_META } from "@/app/workout/exercise/AnnotationSelector";
+import AnnotationSelector, { ANNOTATION_META } from "@/app/workout/exercise/AnnotationSelector";
 import { useAppData } from "@/lib/AppDataContext";
 import { useWorkout } from "@/lib/WorkoutContext";
 import { getLastWorkoutExercise } from "@/lib/api";
@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AnnotationSelector from "./AnnotationSelector";
 
 function lbToKg(lbs: number) : number {
   return 0.45359237 * lbs;

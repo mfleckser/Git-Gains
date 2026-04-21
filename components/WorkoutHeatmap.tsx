@@ -106,7 +106,7 @@ export function WorkoutHeatmap({ workouts }: Props) {
         {/* Week columns */}
         <View style={styles.weeksRow}>
           {weeks.map((week, wIndex) => {
-            const newMonthDay = week.find((d) => d !== null && d!.getDate() == 1);
+            const newMonthDay = week.find((d) => d !== null && d!.getDate() === 1);
             const showMonthLabel =
               wIndex === 0 ||
               (newMonthDay !== undefined &&
