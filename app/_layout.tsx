@@ -3,7 +3,7 @@ import { WorkoutProvider } from "@/lib/WorkoutContext";
 import { supabase } from "@/lib/supabase";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Button, View } from "react-native";
 
 function AppReadyGate() {
   const { loading } = useAppData();
@@ -34,22 +34,27 @@ function AppReadyGate() {
 export default function RootLayout() {
   const [authReady, setAuthReady] = useState(false);
 
+  const devLogin = async () => {
+    await supabase.auth.signInWithPassword({
+      email: process.env.EXPO_PUBLIC_USER_EMAIL!,
+      password: process.env.EXPO_PUBLIC_USER_PASSWORD!
+    });
+    setAuthReady(true);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
-        await supabase.auth.signInWithPassword({
-          email: process.env.EXPO_PUBLIC_USER_EMAIL!,
-          password: process.env.EXPO_PUBLIC_USER_PASSWORD!,
-        });
+      if (session) {
+        setAuthReady(true);
       }
-      setAuthReady(true);
     });
   }, []);
 
   if (!authReady) {
     return (
       <View style={{ flex: 1, backgroundColor: "#000000", justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator color="#007AFF" />
+        {/* <ActivityIndicator color="#007AFF" /> */}
+        <Button onPress={devLogin} title="Dev Login" />
       </View>
     );
   }
