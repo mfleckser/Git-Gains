@@ -32,12 +32,15 @@ export type WorkoutSet = {
   completed: boolean;
 };
 
+export type Annotation = 'down' | 'stay' | 'up';
+
 export type WorkoutExercise = {
   id: string;
   exerciseId: string;
   order: number;
   sets: WorkoutSet[];
   notes?: string;
+  annotation: Annotation;
 };
 
 export type Workout = {

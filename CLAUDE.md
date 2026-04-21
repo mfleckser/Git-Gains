@@ -18,12 +18,21 @@ supabase migration new <name>  # Create a new migration file
 ### Stack
 - **Expo Router v6** — file-based routing. Tab screens live in `app/(tabs)/`, modal screens at the root `app/` level.
 - **Supabase** — PostgreSQL backend with Row Level Security. Client singleton in `lib/supabase.ts`. All data access goes through `lib/api.ts`.
-- **WorkoutContext** (`lib/WorkoutContext.tsx`) — global state for the in-progress workout. Uses `useReducer`. Side effects (async saves) happen in provider callbacks, not in the reducer.
+- **AppDataContext** (`lib/AppDataContext.tsx`) — session-level cache for exercises, templates, and workouts. Loads all three in parallel on startup via `Promise.all`. Exposes `refreshExercises()`, `refreshTemplates()`, `refreshWorkouts()` for targeted re-fetches after mutations. All screens read from this context — no per-screen fetches.
+- **WorkoutContext** (`lib/WorkoutContext.tsx`) — global state for the in-progress workout. Uses `useReducer`. Side effects (async saves) happen in provider callbacks, not in the reducer. Calls `refreshWorkouts()` after saving a finished workout.
 
 ### Data Flow
-All screens load data with `useEffect` + `useState` (or `useFocusEffect` when data should refresh on tab re-focus). There is no global cache — each screen fetches what it needs.
+All data is loaded once at startup in `AppDataContext` and cached for the session. Screens read from `useAppData()` — no `useEffect` data fetches in screen components. After mutations (create/update/delete), screens call the relevant `refresh*()` method to update the cache.
 
-Exercise names are not stored on workout rows — only `exerciseId` is stored. Screens that need to display names fetch all exercises with `getExercises()` and build a `Map<string, Exercise>` for O(1) lookup.
+Exercise names are not stored on workout rows — only `exerciseId` is stored. `AppDataContext` derives `exerciseMap: Map<string, Exercise>` alongside `exercises` for O(1) lookup everywhere.
+
+### Provider Nesting
+```
+AppDataProvider       ← session cache; fetches all data on mount
+  AppReadyGate        ← shows spinner until loading = false
+    WorkoutProvider   ← in-progress workout state
+      Stack           ← Expo Router navigation
+```
 
 ### Database Schema (Supabase)
 - `exercises` — global catalog (`user_id = NULL`) + user-created customs (`user_id = <uid>`)
@@ -36,7 +45,7 @@ RLS policies use `auth.uid()`. The app auto-signs in on startup (`app/_layout.ts
 
 ### Navigation Structure
 ```
-app/_layout.tsx          ← Root Stack; handles auth init; wraps everything in WorkoutProvider
+app/_layout.tsx          ← Root Stack; handles auth init; wraps in AppDataProvider → AppReadyGate → WorkoutProvider
   (tabs)/
     index.tsx            ← Home: workout history + heatmap
     templates/           ← Template CRUD (nested Stack)

@@ -3,6 +3,7 @@ import { formatDuration } from "@/lib/api";
 import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, Workout } from "@/lib/types";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -75,7 +76,8 @@ function WorkoutRow({
 }
 
 export default function HomeScreen() {
-  const { workouts, exerciseMap } = useAppData();
+  const { workouts, exerciseMap, refreshWorkouts } = useAppData();
+  const [refreshing, setRefreshing] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -84,6 +86,12 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <WorkoutRow workout={item} exerciseMap={exerciseMap} />}
         contentContainerStyle={styles.list}
+        refreshing={refreshing}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await refreshWorkouts();
+          setRefreshing(false);
+        }}
         ListHeaderComponent={
           <>
             <WorkoutHeatmap workouts={workouts} />

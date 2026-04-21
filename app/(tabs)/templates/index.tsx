@@ -1,15 +1,16 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, WorkoutTemplate } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 
 function TemplateRow({
   template,
@@ -55,7 +56,8 @@ function TemplateRow({
 }
 
 export default function TemplatesScreen() {
-  const { templates, exerciseMap } = useAppData();
+  const { templates, exerciseMap, refreshTemplates } = useAppData();
+  const [refreshing, setRefreshing] = useState(false);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -64,6 +66,12 @@ export default function TemplatesScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TemplateRow template={item} exerciseMap={exerciseMap} />}
         contentContainerStyle={styles.list}
+        refreshing={refreshing}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await refreshTemplates();
+          setRefreshing(false);
+        }}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>No templates yet</Text>

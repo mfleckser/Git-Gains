@@ -5,7 +5,7 @@ import React, {
   useCallback,
 } from "react";
 import * as Haptics from "expo-haptics";
-import type { Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate } from "./types";
+import type { Annotation, Workout, WorkoutExercise, WorkoutSet, WorkoutTemplate } from "./types";
 import { saveWorkout } from "./api";
 import { useAppData } from "./AppDataContext";
 
@@ -36,6 +36,10 @@ type Action =
       type: "TOGGLE_SET_COMPLETE";
       payload: { workoutExerciseId: string; setId: string };
     }
+  | {
+      type: "SET_ANNOTATION";
+      payload: { workoutExerciseId: string; annotation: Annotation };
+    }
   | { type: "FINISH_WORKOUT"; payload: Workout }
   | { type: "DISCARD_WORKOUT" };
 
@@ -62,6 +66,7 @@ function reducer(state: State, action: Action): State {
               completed: false,
             })),
             notes: te.notes,
+            annotation: "stay",
           }))
         : [];
 
@@ -84,6 +89,7 @@ function reducer(state: State, action: Action): State {
         exerciseId,
         order: state.active.workout.exercises.length,
         sets: [{ id: generateId(), setNumber: 1, weight: 0, reps: 0, completed: false }],
+        annotation: "stay",
       };
       return {
         ...state,
@@ -123,9 +129,13 @@ function reducer(state: State, action: Action): State {
       const { workoutExerciseId, setId, field, value } = action.payload;
       const exercises = state.active.workout.exercises.map((we) => {
         if (we.id !== workoutExerciseId) return we;
-        const sets = we.sets.map((s) =>
-          s.id === setId ? { ...s, [field]: value } : s
-        );
+        const updatedSet = we.sets.find((s) => s.id === setId);
+        const sets = we.sets.map((s) => {
+          if (s.id === setId) return { ...s, [field]: value };
+          if (field === "weight" && updatedSet && s.setNumber > updatedSet.setNumber)
+            return { ...s, weight: value as number };
+          return s;
+        });
         return { ...we, sets };
       });
       return {
@@ -144,6 +154,18 @@ function reducer(state: State, action: Action): State {
         );
         return { ...we, sets };
       });
+      return {
+        ...state,
+        active: { ...state.active, workout: { ...state.active.workout, exercises } },
+      };
+    }
+
+    case "SET_ANNOTATION": {
+      if (!state.active) return state;
+      const { workoutExerciseId, annotation } = action.payload;
+      const exercises = state.active.workout.exercises.map((we) =>
+        we.id === workoutExerciseId ? { ...we, annotation } : we
+      );
       return {
         ...state,
         active: { ...state.active, workout: { ...state.active.workout, exercises } },
@@ -176,6 +198,7 @@ type WorkoutContextValue = {
     value: number
   ) => void;
   toggleSetComplete: (workoutExerciseId: string, setId: string) => void;
+  setAnnotation: (workoutExerciseId: string, annotation: Annotation) => void;
   finishWorkout: () => void;
   discardWorkout: () => void;
 };
@@ -213,6 +236,13 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "TOGGLE_SET_COMPLETE", payload: { workoutExerciseId, setId } });
   }, []);
 
+  const setAnnotation = useCallback(
+    (workoutExerciseId: string, annotation: Annotation) => {
+      dispatch({ type: "SET_ANNOTATION", payload: { workoutExerciseId, annotation } });
+    },
+    []
+  );
+
   const finishWorkout = useCallback(() => {
     if (!state.active) return;
     const now = new Date();
@@ -242,6 +272,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         addSet,
         updateSet,
         toggleSetComplete,
+        setAnnotation,
         finishWorkout,
         discardWorkout,
       }}

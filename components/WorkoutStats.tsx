@@ -1,5 +1,7 @@
+import { ANNOTATION_META } from "@/app/workout/exercise/AnnotationSelector";
 import { formatDuration, getExercises } from "@/lib/api";
 import type { Exercise, Workout } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -49,7 +51,16 @@ export function WorkoutStats({ workout }: { workout: Workout }) {
         const completedCount = item.sets.filter((s) => s.completed).length;
         return (
           <View key={item.id} style={styles.exerciseCard}>
-            <Text style={styles.exerciseName}>{exercise?.name ?? "Unknown"}</Text>
+            <View style={styles.exerciseHeader}>
+              <Text style={styles.exerciseName}>{exercise?.name ?? "Unknown"}</Text>
+              {item.annotation !== "stay" && (
+                <Ionicons
+                  name={ANNOTATION_META[item.annotation].icon}
+                  size={18}
+                  color={ANNOTATION_META[item.annotation].color}
+                />
+              )}
+            </View>
             {item.sets.map((s) => (
               <View key={s.id} style={styles.setRow}>
                 <Text style={styles.setLabel}>Set {s.setNumber}</Text>
@@ -112,11 +123,16 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
+  exerciseHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
   exerciseName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
-    marginBottom: 8,
   },
   setRow: {
     flexDirection: "row",

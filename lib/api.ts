@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Exercise, Workout, WorkoutExercise, WorkoutTemplate } from './types';
+import type { Annotation, Exercise, Workout, WorkoutExercise, WorkoutTemplate } from './types';
 
 async function getUserId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -173,6 +173,7 @@ function mapWorkoutRow(row: any): Workout {
         exerciseId: we.exercise_id,
         order: we.order,
         notes: we.notes ?? undefined,
+        annotation: (we.annotation ?? 'stay') as Annotation,
         sets: (we.workout_sets as any[])
           .sort((a, b) => a.set_number - b.set_number)
           .map((s) => ({
@@ -222,6 +223,7 @@ export async function saveWorkout(workout: Workout): Promise<void> {
         exerciseId: we.exerciseId,
         order: we.order,
         notes: we.notes ?? null,
+        annotation: we.annotation,
         sets: we.sets.map((s) => ({
           setNumber: s.setNumber,
           weight: s.weight,
@@ -263,6 +265,7 @@ export async function getLastWorkoutExercise(
     exerciseId: we.exercise_id,
     order: we.order,
     notes: we.notes ?? undefined,
+    annotation: (we.annotation ?? 'stay') as Annotation,
     sets: (we.workout_sets as any[])
       .sort((a: any, b: any) => a.set_number - b.set_number)
       .map((s: any) => ({

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "git_gains",
-    "slug": "git_gains",
+    "name": "learn_expo",
+    "slug": "learn_expo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mfleckser.learn-expo"
+      "bundleIdentifier": "com.mfleckser.learn-expo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +23,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mfleckser.learnexpo"
     },
     "web": {
       "output": "static",

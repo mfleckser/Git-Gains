@@ -1,20 +1,20 @@
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Modal,
-  Alert,
-} from "react-native";
-import { useState } from "react";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { createTemplate, updateTemplate } from "@/lib/api";
 import { useAppData } from "@/lib/AppDataContext";
-import type { WorkoutTemplate, TemplateExercise } from "@/lib/types";
+import type { TemplateExercise, WorkoutTemplate } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type Props = {
   initialTemplate?: WorkoutTemplate;

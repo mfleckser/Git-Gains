@@ -1,5 +1,6 @@
-import { useWorkout } from "@/lib/WorkoutContext";
+import { ANNOTATION_META } from "@/app/workout/exercise/AnnotationSelector";
 import { useAppData } from "@/lib/AppDataContext";
+import { useWorkout } from "@/lib/WorkoutContext";
 import { getLastWorkoutExercise } from "@/lib/api";
 import type { WorkoutExercise, WorkoutSet } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,20 +12,33 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import AnnotationSelector from "./AnnotationSelector";
+
+function lbToKg(lbs: number) : number {
+  return 0.45359237 * lbs;
+}
+
+function kgToLb(kgs: number) : number {
+  return 2.2046226218 * kgs;
+}
 
 function SetRow({
   set,
   workoutExerciseId,
+  useKg
 }: {
   set: WorkoutSet;
   workoutExerciseId: string;
+  useKg: boolean
 }) {
   const { updateSet, toggleSetComplete } = useWorkout();
+  const [weightText, setWeightText] = useState("");
 
   return (
     <View style={[styles.setRow, set.completed && styles.setRowCompleted]}>
@@ -35,17 +49,20 @@ function SetRow({
       <View style={styles.inputGroup}>
         <TextInput
           style={styles.input}
-          value={set.weight === 0 ? "" : String(set.weight)}
-          onChangeText={(v) => {
-            const n = parseFloat(v);
-            updateSet(workoutExerciseId, set.id, "weight", isNaN(n) ? 0 : n);
+          value={weightText}
+          onChangeText={setWeightText}
+          onEndEditing={(e) => {
+            const n = parseFloat(weightText);
+            const lbsWeight = useKg ? Math.round(kgToLb(n) * 10) / 10 : n;
+            updateSet(workoutExerciseId, set.id, "weight", isNaN(n) ? 0 : lbsWeight);
+            setWeightText(isNaN(n) || n === 0 ? "" : String(n));
           }}
           keyboardType="decimal-pad"
           placeholder="0"
           placeholderTextColor="#48484A"
           selectTextOnFocus
         />
-        <Text style={styles.inputLabel}>lbs</Text>
+        <Text style={styles.inputLabel}>{useKg ? "kgs" : "lbs"}</Text>
       </View>
 
       <Text style={styles.separator}>×</Text>
@@ -86,6 +103,7 @@ export default function ExerciseScreen() {
   const { active, addSet } = useWorkout();
   const { exerciseMap } = useAppData();
   const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
+  const [useKg, setUseKg] = useState(false);
 
   const workoutExercise = active?.workout.exercises.find(
     (e) => e.id === workoutExerciseId
@@ -117,10 +135,19 @@ export default function ExerciseScreen() {
                 {/* Last time card */}
                 {lastTime && lastTime.sets.length > 0 && (
                   <View style={styles.lastTimeCard}>
-                    <Text style={styles.lastTimeTitle}>Last Time</Text>
+                    <View style={styles.lastTimeHeader}>
+                      <Text style={styles.lastTimeTitle}>Last Time</Text>
+                      {lastTime.annotation !== "stay" && (
+                        <Ionicons
+                          name={ANNOTATION_META[lastTime.annotation].icon}
+                          size={18}
+                          color={ANNOTATION_META[lastTime.annotation].color}
+                        />
+                      )}
+                    </View>
                     {lastTime.sets.map((s) => (
                       <Text key={s.id} style={styles.lastTimeSet}>
-                        Set {s.setNumber}: {s.weight > 0 ? `${s.weight} lbs × ` : "BW × "}
+                        Set {s.setNumber}: {s.weight > 0 ? `${useKg ? Math.round(lbToKg(s.weight) * 10) / 10 : s.weight} ${useKg ? "kgs" : "lbs"} × ` : "BW × "}
                         {s.reps} reps
                       </Text>
                     ))}
@@ -138,7 +165,7 @@ export default function ExerciseScreen() {
               </View>
             }
             renderItem={({ item }) => (
-              <SetRow set={item} workoutExerciseId={workoutExerciseId} />
+              <SetRow set={item} workoutExerciseId={workoutExerciseId} useKg={useKg} />
             )}
             ListFooterComponent={
               <TouchableOpacity
@@ -151,6 +178,24 @@ export default function ExerciseScreen() {
               </TouchableOpacity>
             }
           />
+          <AnnotationSelector workoutExerciseId={workoutExerciseId} />
+          <View style={styles.unitsContainer}>
+            <TouchableOpacity onPress={() => setUseKg(false)}>
+              <Text style={useKg ? styles.unitTextUnselected : styles.unitTextSelected}>lbs</Text>
+            </TouchableOpacity>
+            <Switch 
+              style={styles.unitSwitch}
+              trackColor={{false: "#3F3F3F", true: "#3F3F3F"}}
+              ios_backgroundColor="#3F3F3F"
+              onValueChange={(v) => {
+                setUseKg(v);
+              }}
+              value={useKg}
+            />
+            <TouchableOpacity onPress={() => setUseKg(true)}>
+              <Text style={useKg ? styles.unitTextSelected : styles.unitTextUnselected}>kgs</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
     </>
@@ -158,7 +203,10 @@ export default function ExerciseScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000000" },
+  container: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
   list: { padding: 16, paddingBottom: 40 },
   lastTimeCard: {
     backgroundColor: "#1C1C1E",
@@ -167,6 +215,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderLeftWidth: 3,
     borderLeftColor: "#007AFF",
+  },
+  lastTimeHeader: {
+    flexDirection: "row",
+    gap: 8
   },
   lastTimeTitle: {
     fontSize: 12,
@@ -242,6 +294,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 12,
+    width: 25,
     color: "#48484A",
   },
   separator: {
@@ -274,4 +327,23 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     fontWeight: "500",
   },
+  unitsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  unitSwitch: {
+    alignSelf: "center",
+    margin: 10,
+  },
+  unitTextSelected: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#30D158"
+  },
+  unitTextUnselected: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#A0A0A0"
+  }
 });
