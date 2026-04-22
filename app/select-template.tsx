@@ -1,15 +1,16 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useAppData } from "@/lib/AppDataContext";
 import { useWorkout } from "@/lib/WorkoutContext";
+import { WorkoutTemplate } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import {
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function SelectTemplateScreen() {
   const { startWorkout } = useWorkout();

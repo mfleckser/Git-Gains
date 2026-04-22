@@ -1,13 +1,17 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import React, {
   createContext,
-  useContext,
-  useReducer,
   useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
 } from "react";
-import * as Haptics from "expo-haptics";
-import type { Annotation, Workout, WorkoutTemplate } from "./types";
 import { saveWorkout } from "./api";
 import { useAppData } from "./AppDataContext";
+import type { Annotation, Workout, WorkoutTemplate } from "./types";
 import {
   ActiveWorkout,
   initialWorkoutState,
@@ -30,6 +34,7 @@ type WorkoutContextValue = {
   setAnnotation: (workoutExerciseId: string, annotation: Annotation) => void;
   finishWorkout: () => void;
   discardWorkout: () => void;
+  loadWorkout: (activeWorkout: ActiveWorkout) => void;
 };
 
 const WorkoutContext = createContext<WorkoutContextValue | null>(null);
@@ -37,6 +42,10 @@ const WorkoutContext = createContext<WorkoutContextValue | null>(null);
 export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(workoutReducer, initialWorkoutState);
   const { refreshWorkouts } = useAppData();
+
+  useEffect(() => {
+    AsyncStorage.setItem("current_workout", JSON.stringify(state.active));
+  }, [state.active])
 
   const startWorkout = useCallback((template?: WorkoutTemplate) => {
     dispatch({ type: "START_WORKOUT", payload: { template } });
@@ -88,20 +97,23 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: "DISCARD_WORKOUT" });
   }, []);
 
+  const loadWorkout = useCallback((activeWorkout: ActiveWorkout) => {
+    dispatch({ type: "LOAD_WORKOUT", payload: activeWorkout });
+    router.navigate("/workout/active");
+  }, []);
+
+  const value = useMemo(() => ({
+    active: state.active,
+    completedWorkout: state.completedWorkout,
+    startWorkout, addExercise, addSet, updateSet,
+    toggleSetComplete, setAnnotation, finishWorkout,
+    discardWorkout, loadWorkout,
+  }), [state.active, state.completedWorkout, startWorkout, addExercise, addSet, updateSet, toggleSetComplete, setAnnotation, finishWorkout, discardWorkout, loadWorkout]);
+
+
   return (
     <WorkoutContext.Provider
-      value={{
-        active: state.active,
-        completedWorkout: state.completedWorkout,
-        startWorkout,
-        addExercise,
-        addSet,
-        updateSet,
-        toggleSetComplete,
-        setAnnotation,
-        finishWorkout,
-        discardWorkout,
-      }}
+      value={value}
     >
       {children}
     </WorkoutContext.Provider>

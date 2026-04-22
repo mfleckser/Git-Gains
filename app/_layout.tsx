@@ -1,7 +1,7 @@
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { AppDataProvider, useAppData } from "@/lib/AppDataContext";
 import { WorkoutProvider } from "@/lib/WorkoutContext";
 import { supabase } from "@/lib/supabase";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import * as Sentry from "@sentry/react-native";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";

@@ -2,8 +2,10 @@ import { WorkoutHeatmap } from "@/components/WorkoutHeatmap";
 import { formatDuration } from "@/lib/api";
 import { useAppData } from "@/lib/AppDataContext";
 import type { Exercise, Workout } from "@/lib/types";
+import { useWorkout } from "@/lib/WorkoutContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -78,6 +80,20 @@ function WorkoutRow({
 export default function HomeScreen() {
   const { workouts, exerciseMap, refreshWorkouts } = useAppData();
   const [refreshing, setRefreshing] = useState(false);
+  const { loadWorkout } = useWorkout();
+
+  useEffect(() => {
+    const fetchAndUpdateWorkout = async () => {
+      const current_workout = await AsyncStorage.getItem("current_workout");
+      if (current_workout) {
+        const parsed = JSON.parse(current_workout);
+        parsed.startedAt = new Date(parsed.startedAt);
+        loadWorkout(parsed);
+      }
+    }
+
+    fetchAndUpdateWorkout();
+  }, [loadWorkout])
 
   return (
     <SafeAreaView style={styles.container}>

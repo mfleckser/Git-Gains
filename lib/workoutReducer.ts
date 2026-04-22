@@ -38,7 +38,8 @@ export type WorkoutAction =
       payload: { workoutExerciseId: string; annotation: Annotation };
     }
   | { type: "FINISH_WORKOUT"; payload: Workout }
-  | { type: "DISCARD_WORKOUT" };
+  | { type: "DISCARD_WORKOUT" }
+  | { type: "LOAD_WORKOUT"; payload: ActiveWorkout };
 
 export const initialWorkoutState: WorkoutState = {
   active: null,
@@ -180,6 +181,10 @@ export function workoutReducer(state: WorkoutState, action: WorkoutAction): Work
 
     case "DISCARD_WORKOUT": {
       return { active: null, completedWorkout: null };
+    }
+
+    case "LOAD_WORKOUT": {
+      return { active: action.payload, completedWorkout: null };
     }
 
     default:

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getExercises, getTemplates, getWorkoutHistory } from "./api";
 import type { Exercise, Workout, WorkoutTemplate } from "./types";
 
@@ -28,10 +28,10 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
 
-  function applyExercises(exs: Exercise[]) {
+  const applyExercises = useCallback((exs: Exercise[]) => {
     setExercises(exs);
     setExerciseMap(new Map(exs.map((e) => [e.id, e])));
-  }
+  }, []);
 
   useEffect(() => {
     Promise.all([getExercises(), getTemplates(), getWorkoutHistory()]).then(
@@ -42,35 +42,37 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
       }
     );
-  }, []);
+  }, [applyExercises]);
 
-  async function refreshExercises() {
+  const refreshExercises = useCallback(async () => {
     const exs = await getExercises();
     applyExercises(exs);
-  }
+  }, [applyExercises]);
 
-  async function refreshTemplates() {
+  const refreshTemplates = useCallback(async () => {
     const tmps = await getTemplates();
     setTemplates(tmps);
-  }
+  }, []);
 
-  async function refreshWorkouts() {
+  const refreshWorkouts = useCallback(async () => {
     const wkts = await getWorkoutHistory();
     setWorkouts(wkts);
-  }
+  }, []);
+
+  const value = useMemo(() => ({
+    exercises,
+    exerciseMap,
+    templates,
+    workouts,
+    loading,
+    refreshExercises,
+    refreshTemplates,
+    refreshWorkouts,
+  }), [exercises, exerciseMap, templates, workouts, loading, refreshExercises, refreshTemplates, refreshWorkouts]);
 
   return (
     <AppDataContext.Provider
-      value={{
-        exercises,
-        exerciseMap,
-        templates,
-        workouts,
-        loading,
-        refreshExercises,
-        refreshTemplates,
-        refreshWorkouts,
-      }}
+      value={value}
     >
       {children}
     </AppDataContext.Provider>
