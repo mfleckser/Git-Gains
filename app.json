@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.mfleckser.learn-expo",
+      "deploymentTarget": "16.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -44,15 +45,7 @@
           }
         }
       ],
-      "@sentry/react-native",
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "git-gains",
-          "organization": "mark-fleckser"
-        }
-      ]
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true,

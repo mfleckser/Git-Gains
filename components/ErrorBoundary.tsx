@@ -1,4 +1,3 @@
-import * as Sentry from "@sentry/react-native";
 import { router } from "expo-router";
 import { Component, ReactNode } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
@@ -14,8 +13,7 @@ interface State {
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
-  componentDidCatch(error: Error) {
-    Sentry.captureException(error);
+  componentDidCatch(_error: Error) {
     this.setState({ hasError: true });
   }
 

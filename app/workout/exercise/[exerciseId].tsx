@@ -5,8 +5,9 @@ import { getLastWorkoutExercise } from "@/lib/api";
 import type { WorkoutExercise, WorkoutSet } from "@/lib/types";
 import { kgToLb, lbToKg, roundTenth } from "@/lib/units";
 import { Ionicons } from "@expo/vector-icons";
+import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -17,17 +18,20 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
 
 function SetRow({
   set,
   workoutExerciseId,
-  useKg
+  useKg,
+  resetRestTimer
 }: {
   set: WorkoutSet;
   workoutExerciseId: string;
-  useKg: boolean
+  useKg: boolean,
+  resetRestTimer: () => void
 }) {
   const { updateSet, toggleSetComplete } = useWorkout();
   const [weightText, setWeightText] = useState("");
@@ -77,7 +81,10 @@ function SetRow({
 
       <TouchableOpacity
         style={[styles.checkButton, set.completed && styles.checkButtonDone]}
-        onPress={() => toggleSetComplete(workoutExerciseId, set.id)}
+        onPress={() => {
+          toggleSetComplete(workoutExerciseId, set.id);
+          resetRestTimer();
+        }}
         activeOpacity={0.7}
       >
         {set.completed ? (
@@ -90,22 +97,65 @@ function SetRow({
   );
 }
 
+const completeSound = require("../../../assets/audio/rest_complete.mp3");
+setAudioModeAsync({
+  playsInSilentMode: true,
+  shouldPlayInBackground: true,
+  interruptionMode: 'duckOthers'
+});
+
 export default function ExerciseScreen() {
+  const REST_TIME_S = 3;
+
   const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const { active, addSet } = useWorkout();
   const { exerciseMap } = useAppData();
   const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
   const [useKg, setUseKg] = useState(false);
+  const [restSeconds, setRestSeconds] = useState(REST_TIME_S);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const player = useAudioPlayer(completeSound);
 
   const workoutExercise = active?.workout.exercises.find(
     (e) => e.id === workoutExerciseId
   );
   const exercise = workoutExercise ? exerciseMap.get(workoutExercise.exerciseId) : undefined;
 
+
   useEffect(() => {
     if (!workoutExercise) return;
     getLastWorkoutExercise(workoutExercise.exerciseId).then(setLastTime);
   }, [workoutExercise?.exerciseId]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const resetRestTimer = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    intervalRef.current = setInterval(async () => {
+      setRestSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current!);
+          intervalRef.current = null;
+          if (prev === 1) {
+            Vibration.vibrate([800, 800, 800]);
+            player.seekTo(0);
+            player.play();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    setRestSeconds(REST_TIME_S);
+  }
+
+  const formatTime = (seconds: number) => { return `${Math.floor(restSeconds / 60)}:${String(restSeconds % 60).padStart(2, "0")}` };
 
   if (!workoutExercise || !active) return null;
 
@@ -157,7 +207,7 @@ export default function ExerciseScreen() {
               </View>
             }
             renderItem={({ item }) => (
-              <SetRow set={item} workoutExerciseId={workoutExerciseId} useKg={useKg} />
+              <SetRow set={item} workoutExerciseId={workoutExerciseId} useKg={useKg} resetRestTimer={resetRestTimer} />
             )}
             ListFooterComponent={
               <TouchableOpacity
@@ -170,6 +220,7 @@ export default function ExerciseScreen() {
               </TouchableOpacity>
             }
           />
+          <Text style={styles.addSetText}>Rest Timer: {formatTime(restSeconds)}</Text>
           <AnnotationSelector workoutExerciseId={workoutExerciseId} />
           <View style={styles.unitsContainer}>
             <TouchableOpacity onPress={() => setUseKg(false)}>
