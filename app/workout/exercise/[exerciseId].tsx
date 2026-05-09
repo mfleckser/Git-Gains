@@ -105,7 +105,7 @@ setAudioModeAsync({
 });
 
 export default function ExerciseScreen() {
-  const REST_TIME_S = 3;
+  const REST_TIME_S = 180;
 
   const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const { active, addSet } = useWorkout();
