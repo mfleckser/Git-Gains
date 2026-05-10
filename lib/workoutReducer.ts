@@ -135,8 +135,6 @@ export function workoutReducer(state: WorkoutState, action: WorkoutAction): Work
         const updatedSet = we.sets.find((s) => s.id === setId);
         const sets = we.sets.map((s) => {
           if (s.id === setId) return { ...s, [field]: value };
-          if (field === "weight" && updatedSet && s.setNumber > updatedSet.setNumber)
-            return { ...s, weight: value as number };
           return s;
         });
         return { ...we, sets };

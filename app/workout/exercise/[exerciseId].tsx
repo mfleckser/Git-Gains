@@ -35,6 +35,18 @@ function SetRow({
 }) {
   const { updateSet, toggleSetComplete } = useWorkout();
   const [weightText, setWeightText] = useState("");
+  const [repsText, setRepsText] = useState("");
+
+  useEffect(() => {
+    if (set.completed) {
+      if (set.weight !== 0) {
+        setWeightText(set.weight.toString());
+      }
+      if (set.reps !== 0) {
+        setRepsText(set.reps.toString());
+      }
+    }
+  });
 
   return (
     <View style={[styles.setRow, set.completed && styles.setRowCompleted]}>
@@ -47,12 +59,6 @@ function SetRow({
           style={styles.input}
           value={weightText}
           onChangeText={setWeightText}
-          onEndEditing={(e) => {
-            const n = parseFloat(weightText);
-            const lbsWeight = useKg ? roundTenth(kgToLb(n)) : n;
-            updateSet(workoutExerciseId, set.id, "weight", isNaN(n) ? 0 : lbsWeight);
-            setWeightText(isNaN(n) || n === 0 ? "" : String(n));
-          }}
           keyboardType="decimal-pad"
           placeholder="0"
           placeholderTextColor="#48484A"
@@ -66,11 +72,8 @@ function SetRow({
       <View style={styles.inputGroup}>
         <TextInput
           style={styles.input}
-          value={set.reps === 0 ? "" : String(set.reps)}
-          onChangeText={(v) => {
-            const n = parseInt(v, 10);
-            updateSet(workoutExerciseId, set.id, "reps", isNaN(n) ? 0 : n);
-          }}
+          value={repsText}
+          onChangeText={setRepsText}
           keyboardType="number-pad"
           placeholder="0"
           placeholderTextColor="#48484A"
@@ -83,7 +86,14 @@ function SetRow({
         style={[styles.checkButton, set.completed && styles.checkButtonDone]}
         onPress={() => {
           toggleSetComplete(workoutExerciseId, set.id);
-          resetRestTimer();
+          if (!set.completed) {
+            resetRestTimer();
+            const weight = parseFloat(weightText);
+            const lbsWeight = useKg ? roundTenth(kgToLb(weight)) : weight;
+            updateSet(workoutExerciseId, set.id, "weight", isNaN(lbsWeight) ? 0 : lbsWeight);
+            const reps = parseInt(repsText, 10);
+            updateSet(workoutExerciseId, set.id, "reps", isNaN(reps) ? 0 : reps);
+          }
         }}
         activeOpacity={0.7}
       >
