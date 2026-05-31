@@ -7,7 +7,7 @@ import { kgToLb, lbToKg, roundTenth } from "@/lib/units";
 import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -122,8 +122,8 @@ export default function ExerciseScreen() {
   const { exerciseMap } = useAppData();
   const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
   const [useKg, setUseKg] = useState(false);
+  const [restTimerPaused, setRestTimerPaused] = useState(true);
   const [restSeconds, setRestSeconds] = useState(REST_TIME_S);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const player = useAudioPlayer(completeSound);
 
   const workoutExercise = active?.workout.exercises.find(
@@ -138,19 +138,11 @@ export default function ExerciseScreen() {
   }, [workoutExercise?.exerciseId]);
 
   useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
-  const resetRestTimer = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-
-    intervalRef.current = setInterval(async () => {
-      setRestSeconds(prev => {
+    const intervalRef = setInterval(() => {
+      if (!restTimerPaused)
+        setRestSeconds(prev => {
         if (prev <= 1) {
-          clearInterval(intervalRef.current!);
-          intervalRef.current = null;
+          setRestTimerPaused(true);
           if (prev === 1) {
             Vibration.vibrate([800, 800, 800]);
             player.seekTo(0);
@@ -160,8 +152,15 @@ export default function ExerciseScreen() {
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 1000)
 
+    return () => {
+      clearInterval(intervalRef);
+    };
+  }, [restTimerPaused]);
+
+  const resetRestTimer = () => {
+    setRestTimerPaused(false);
     setRestSeconds(REST_TIME_S);
   }
 
@@ -230,7 +229,21 @@ export default function ExerciseScreen() {
               </TouchableOpacity>
             }
           />
-          <Text style={styles.addSetText}>Rest Timer: {formatTime(restSeconds)}</Text>
+          <View style={styles.restTimerContainer}>
+            <TouchableOpacity
+              onPress={() => {setRestTimerPaused(prev => !prev)}}
+              activeOpacity={0.7}
+            >
+              <Ionicons name={restTimerPaused ? "play" : "pause"} size={16} style={styles.restTimerPauseButton}/>
+            </TouchableOpacity>
+            <Text style={styles.restTimerText}>{formatTime(restSeconds)}</Text>
+            <TouchableOpacity
+              onPress={() => setRestSeconds(prev => prev + 15)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.increaseTimerButton}>+15</Text>
+            </TouchableOpacity>
+          </View>
           <AnnotationSelector workoutExerciseId={workoutExerciseId} />
           <View style={styles.unitsContainer}>
             <TouchableOpacity onPress={() => setUseKg(false)}>
@@ -379,6 +392,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#007AFF",
     fontWeight: "500",
+  },
+  restTimerContainer: {
+    display: "flex",
+    flexDirection: "row",
+    margin: 15,
+    width: "40%",
+    backgroundColor: "#2C2C2E",
+    borderRadius: 999,
+    padding: 3
+  },
+  restTimerPauseButton: {
+    color: "#007AFF",
+    marginHorizontal: 10
+  },
+  restTimerText: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: 500,
+    borderLeftWidth: 1,
+    borderRightWidth: 1
+  },
+  increaseTimerButton: {
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: 300,
+    marginHorizontal: 10
   },
   unitsContainer: {
     flexDirection: "row",
