@@ -1,16 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { getExercises, getTemplates, getWorkoutHistory } from "./api";
-import type { Exercise, Workout, WorkoutTemplate } from "./types";
+import { getExercises, getRuns, getTemplates, getWorkoutHistory } from "./api";
+import type { Exercise, Run, Workout, WorkoutTemplate } from "./types";
 
 type AppData = {
   exercises: Exercise[];
   exerciseMap: Map<string, Exercise>;
   templates: WorkoutTemplate[];
   workouts: Workout[];
+  runs: Run[];
   loading: boolean;
   refreshExercises(): Promise<void>;
   refreshTemplates(): Promise<void>;
   refreshWorkouts(): Promise<void>;
+  refreshRuns(): Promise<void>;
 };
 
 const AppDataContext = createContext<AppData | null>(null);
@@ -26,6 +28,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [exerciseMap, setExerciseMap] = useState<Map<string, Exercise>>(new Map());
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
 
   const applyExercises = useCallback((exs: Exercise[]) => {
@@ -34,11 +37,12 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    Promise.all([getExercises(), getTemplates(), getWorkoutHistory()]).then(
-      ([exs, tmps, wkts]) => {
+    Promise.all([getExercises(), getTemplates(), getWorkoutHistory(), getRuns()]).then(
+      ([exs, tmps, wkts, rns]) => {
         applyExercises(exs);
         setTemplates(tmps);
         setWorkouts(wkts);
+        setRuns(rns);
         setLoading(false);
       }
     );
@@ -59,16 +63,23 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     setWorkouts(wkts);
   }, []);
 
+  const refreshRuns = useCallback(async () => {
+    const rns = await getRuns();
+    setRuns(rns);
+  }, []);
+
   const value = useMemo(() => ({
     exercises,
     exerciseMap,
     templates,
     workouts,
+    runs,
     loading,
     refreshExercises,
     refreshTemplates,
     refreshWorkouts,
-  }), [exercises, exerciseMap, templates, workouts, loading, refreshExercises, refreshTemplates, refreshWorkouts]);
+    refreshRuns,
+  }), [exercises, exerciseMap, templates, workouts, runs, loading, refreshExercises, refreshTemplates, refreshWorkouts, refreshRuns]);
 
   return (
     <AppDataContext.Provider

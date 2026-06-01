@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Annotation, Exercise, Workout, WorkoutExercise, WorkoutTemplate } from './types';
+import type { Annotation, Exercise, Run, Workout, WorkoutExercise, WorkoutTemplate } from './types';
 
 async function getUserId(): Promise<string> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -284,4 +284,43 @@ export function formatDuration(seconds: number): string {
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m ${s > 0 ? `${s}s` : ''}`.trim();
   return `${s}s`;
+}
+
+// ─── Runs ─────────────────────────────────────────────────────────────────
+
+export async function getRuns(): Promise<Run[]> {
+  const {data, error} = await supabase
+    .from("runs")
+    .select("*")
+    .order("created_at", {ascending: false});
+  if (error) throw error;
+  return data;
+}
+
+export async function getRunById(id: string): Promise<Run> {
+  const {data, error} = await supabase
+    .from("runs")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function createRun(distance: number, duration: number, tag?: string): Promise<Run> {
+  const {error, data} = await supabase
+    .from("runs")
+    .insert({distance, duration, tag})
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteRun(id: string): Promise<void> {
+  const {error} = await supabase
+    .from("runs")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }

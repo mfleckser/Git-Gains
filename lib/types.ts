@@ -52,3 +52,11 @@ export type Workout = {
   durationSeconds?: number;
   exercises: WorkoutExercise[];
 };
+
+export type Run = {
+  id: string;
+  created_at: string;
+  distance: number;
+  duration: number;
+  tag?: string;
+};
