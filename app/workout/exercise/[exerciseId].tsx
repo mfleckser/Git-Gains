@@ -118,9 +118,10 @@ export default function ExerciseScreen() {
   const REST_TIME_S = 180;
 
   const { exerciseId: workoutExerciseId } = useLocalSearchParams<{ exerciseId: string }>();
-  const { active, addSet } = useWorkout();
+  const { active, addSet, setNotes } = useWorkout();
   const { exerciseMap } = useAppData();
   const [lastTime, setLastTime] = useState<WorkoutExercise | null>(null);
+  const [notesText, setNotesText] = useState("");
   const [useKg, setUseKg] = useState(false);
   const [restTimerPaused, setRestTimerPaused] = useState(true);
   const [restSeconds, setRestSeconds] = useState(REST_TIME_S);
@@ -135,6 +136,10 @@ export default function ExerciseScreen() {
   useEffect(() => {
     if (!workoutExercise) return;
     getLastWorkoutExercise(workoutExercise.exerciseId).then(setLastTime);
+
+    // Initialize set notes
+    const prevNotes = workoutExercise?.notes;
+    if (prevNotes) setNotesText(prevNotes);
   }, [workoutExercise?.exerciseId]);
 
   useEffect(() => {
@@ -165,6 +170,11 @@ export default function ExerciseScreen() {
   }
 
   const formatTime = (seconds: number) => { return `${Math.floor(restSeconds / 60)}:${String(restSeconds % 60).padStart(2, "0")}` };
+
+  const onEditNotes = (v: string) => {
+    setNotes(workoutExerciseId, v);
+    setNotesText(v);
+  }
 
   if (!workoutExercise || !active) return null;
 
@@ -202,6 +212,7 @@ export default function ExerciseScreen() {
                         {s.reps} reps
                       </Text>
                     ))}
+                    {lastTime.notes && <Text style={styles.lastTimeNotes}>Notes: {lastTime.notes}</Text>}
                   </View>
                 )}
 
@@ -228,6 +239,15 @@ export default function ExerciseScreen() {
                 <Text style={styles.addSetText}>Add Set</Text>
               </TouchableOpacity>
             }
+          />
+          <TextInput
+            value={notesText}
+            onChangeText={onEditNotes}
+            multiline
+            numberOfLines={3}
+            style={styles.notesTextInput}
+            placeholder="Exercise notes..."
+            placeholderTextColor={"grey"}
           />
           <View style={styles.restTimerContainer}>
             <TouchableOpacity
@@ -273,7 +293,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000000",
   },
-  list: { padding: 16, paddingBottom: 40 },
+  list: { padding: 16, paddingBottom: 0 },
   lastTimeCard: {
     backgroundColor: "#1C1C1E",
     borderRadius: 12,
@@ -298,6 +318,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#8E8E93",
     marginBottom: 2,
+  },
+  lastTimeNotes: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    marginTop: 5,
+    paddingTop: 5,
+    borderTopWidth: 1,
+    borderTopColor: "#48484A"
   },
   columnHeaders: {
     flexDirection: "row",
@@ -392,6 +420,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#007AFF",
     fontWeight: "500",
+  },
+  notesTextInput: {
+    marginHorizontal: 16,
+    padding: 4,
+    borderRadius: 4,
+    backgroundColor: "#E3E3EA",
+    fontSize: 15,
+    height: 64
   },
   restTimerContainer: {
     display: "flex",

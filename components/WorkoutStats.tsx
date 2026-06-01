@@ -74,6 +74,7 @@ export function WorkoutStats({ workout }: { workout: Workout }) {
             {completedCount === 0 && (
               <Text style={styles.noSets}>No sets completed</Text>
             )}
+            {item.notes && <Text style={styles.setNotes}>Notes: {item.notes}</Text>}
           </View>
         );
       })}
@@ -156,4 +157,12 @@ const styles = StyleSheet.create({
     color: "#48484A",
     fontStyle: "italic",
   },
+  setNotes: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    marginTop: 5,
+    paddingTop: 5,
+    borderTopWidth: 1,
+    borderTopColor: "#48484A"
+  }
 });

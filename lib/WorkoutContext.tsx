@@ -32,6 +32,7 @@ type WorkoutContextValue = {
   ) => void;
   toggleSetComplete: (workoutExerciseId: string, setId: string) => void;
   setAnnotation: (workoutExerciseId: string, annotation: Annotation) => void;
+  setNotes: (workoutExerciseId: string, notes: string) => void;
   finishWorkout: () => void;
   discardWorkout: () => void;
   loadWorkout: (activeWorkout: ActiveWorkout) => void;
@@ -78,6 +79,11 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setNotes = useCallback(
+    (workoutExerciseId: string, notes: string) => {
+      dispatch({ type: "SET_NOTES", payload: { workoutExerciseId, notes } });
+    }, []);
+
   const finishWorkout = useCallback(() => {
     if (!state.active) return;
     const now = new Date();
@@ -107,8 +113,8 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     completedWorkout: state.completedWorkout,
     startWorkout, addExercise, addSet, updateSet,
     toggleSetComplete, setAnnotation, finishWorkout,
-    discardWorkout, loadWorkout,
-  }), [state.active, state.completedWorkout, startWorkout, addExercise, addSet, updateSet, toggleSetComplete, setAnnotation, finishWorkout, discardWorkout, loadWorkout]);
+    discardWorkout, loadWorkout, setNotes
+  }), [state.active, state.completedWorkout, startWorkout, addExercise, addSet, updateSet, toggleSetComplete, setAnnotation, finishWorkout, discardWorkout, loadWorkout, setNotes]);
 
 
   return (

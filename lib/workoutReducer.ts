@@ -37,6 +37,10 @@ export type WorkoutAction =
       type: "SET_ANNOTATION";
       payload: { workoutExerciseId: string; annotation: Annotation };
     }
+  | {
+      type: "SET_NOTES";
+      payload: { workoutExerciseId: string; notes: string };
+    }
   | { type: "FINISH_WORKOUT"; payload: Workout }
   | { type: "DISCARD_WORKOUT" }
   | { type: "LOAD_WORKOUT"; payload: ActiveWorkout };
@@ -166,6 +170,18 @@ export function workoutReducer(state: WorkoutState, action: WorkoutAction): Work
       const { workoutExerciseId, annotation } = action.payload;
       const exercises = state.active.workout.exercises.map((we) =>
         we.id === workoutExerciseId ? { ...we, annotation } : we
+      );
+      return {
+        ...state,
+        active: { ...state.active, workout: { ...state.active.workout, exercises } },
+      };
+    }
+
+    case "SET_NOTES": {
+      if (!state.active) return state;
+      const { workoutExerciseId, notes } = action.payload;
+      const exercises = state.active.workout.exercises.map((we) =>
+        we.id === workoutExerciseId ? { ...we, notes } : we
       );
       return {
         ...state,

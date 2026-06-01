@@ -87,8 +87,10 @@ export default function HomeScreen() {
       const current_workout = await AsyncStorage.getItem("current_workout");
       if (current_workout) {
         const parsed = JSON.parse(current_workout);
-        parsed.startedAt = new Date(parsed.startedAt);
-        loadWorkout(parsed);
+        if (parsed) {
+          parsed.startedAt = new Date(parsed.startedAt);
+          loadWorkout(parsed);
+        }
       }
     }
 
