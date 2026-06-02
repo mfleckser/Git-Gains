@@ -59,4 +59,5 @@ export type Run = {
   distance: number;
   duration: number;
   tag?: string;
+  notes?: string;
 };

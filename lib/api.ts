@@ -307,10 +307,10 @@ export async function getRunById(id: string): Promise<Run> {
   return data;
 }
 
-export async function createRun(distance: number, duration: number, tag?: string): Promise<Run> {
+export async function createRun(distance: number, duration: number, tag?: string, notes?: string): Promise<Run> {
   const {error, data} = await supabase
     .from("runs")
-    .insert({distance, duration, tag})
+    .insert({distance, duration, tag, notes})
     .select()
     .single();
   if (error) throw error;

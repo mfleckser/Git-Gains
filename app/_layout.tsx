@@ -49,6 +49,8 @@ export default function RootLayout() {
         setAuthReady(true);
       }
     });
+
+    devLogin();
   }, []);
 
   if (!authReady) {

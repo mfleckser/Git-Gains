@@ -1,8 +1,11 @@
-import { formatDuration } from "@/lib/api";
+import { deleteRun, formatDuration } from "@/lib/api";
 import { useAppData } from "@/lib/AppDataContext";
 import { Run } from "@/lib/types";
-import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
+    Alert,
     FlatList,
     SafeAreaView,
     StyleSheet,
@@ -57,6 +60,15 @@ function RunTag({ tag }: { tag: string }) {
 }
 
 function RunRow({ data }: { data: Run }) {
+    const {refreshRuns} = useAppData();
+
+    const handleDelete = () => {
+        Alert.alert(`Delete run on ${formatDate(data.created_at)}?`, "", [
+            {text: "Cancel", style: "cancel"},
+            {text: "Delete", style: "destructive", onPress: () => {deleteRun(data.id)}}
+        ]);
+    }
+
     return (
         <TouchableOpacity style={styles.card} activeOpacity={1}>
             <View style={styles.cardHeader}>
@@ -79,11 +91,16 @@ function RunRow({ data }: { data: Run }) {
                     <Text style={styles.statLabel}>pace</Text>
                 </View>
             </View>
-            {data.tag ? (
+            <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
                 <View style={styles.tagRow}>
-                    <RunTag tag={data.tag} />
+                    {data.tag ? (
+                        <RunTag tag={data.tag} />
+                    ) : null}
                 </View>
-            ) : null}
+                <TouchableOpacity onPress={handleDelete} activeOpacity={0.7} style={styles.deleteButton}>
+                    <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                </TouchableOpacity>
+            </View>
         </TouchableOpacity>
     );
 }
@@ -91,6 +108,8 @@ function RunRow({ data }: { data: Run }) {
 export default function RunsScreen() {
     const { runs, refreshRuns } = useAppData();
     const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {refreshRuns()}, [runs]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -120,7 +139,7 @@ export default function RunsScreen() {
             <View style={styles.footer}>
                 <TouchableOpacity
                     style={styles.startButton}
-                    onPress={() => {}}
+                    onPress={() => {router.push("/(tabs)/runs/new")}}
                     activeOpacity={0.85}
                 >
                     <Text style={styles.startButtonText}>Add Run</Text>
@@ -203,6 +222,14 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
         textTransform: "capitalize",
+    },
+    deleteButton: {
+        justifyContent: "flex-end",
+        borderWidth: 1,
+        borderColor: "#48484A",
+        backgroundColor: "#2C2C2E",
+        padding: 6,
+        borderRadius: 999
     },
     emptyState: {
         alignItems: "center",
